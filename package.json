@@ -1,0 +1,34 @@
+{
+  "name": "netbreaker",
+  "version": "1.0.0",
+  "description": "A program for securing your device while forwarding a port on your local network to WAN",
+  "keywords": [
+    "network",
+    "security",
+    "cybersecurity",
+    "networking",
+    "wifi",
+    "wan",
+    "lan",
+    "portforwarding",
+    "safety"
+  ],
+  "homepage": "https://github.com/kaushal937/NetBreaker#readme",
+  "bugs": {
+    "url": "https://github.com/kaushal937/NetBreaker/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaushal937/NetBreaker.git"
+  },
+  "license": "ISC",
+  "author": "kaushal937",
+  "type": "commonjs",
+  "main": "app.ts",
+  "scripts": {
+    "test": "node ."
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}
