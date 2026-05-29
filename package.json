@@ -23,12 +23,20 @@
   },
   "license": "ISC",
   "author": "kaushal937",
-  "type": "commonjs",
   "main": "app.ts",
   "scripts": {
-    "test": "node ."
+    "start": "npx tsc && node dist/app.js"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/ejs": "^3.1.5",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.7.0",
     "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1"
   }
 }
