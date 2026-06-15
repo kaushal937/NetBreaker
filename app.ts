@@ -6,6 +6,8 @@ import bodyParser from 'body-parser';
 import cookieparser from 'cookie-parser';
 import settings from './interfaces/interfaces';
 import os from 'os';
+import { Readable } from 'stream';
+
 import allmisc from './miscellaneous/allmisc';
 import {getsetting} from "./config/getsettings";
 
@@ -15,6 +17,7 @@ let settingsData:settings = {
     target : 0,
     port : 0,
     runningStatus : 0,
+    currentServerStatus : 0,
     hostOS: "string",
     targetURL : "string"
 }
@@ -121,18 +124,15 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 //layer 1: catches if the server is offline
-let currentServerStatus;
+let currentServerStatus:number;
 
-fetch(settingsData.targetURL)
+fetch(settingsData.targetURL+"/")
   .then(response => {
-    // 'response' here is correctly typed by TypeScript
-    if (!response.ok) {
-      throw new Error(`Status: ${response.status}`);
-    }
-    currentServerStatus
+    currentServerStatus=1
   })
   .catch(error => {
-    console.warn('Server is offline');
+    console.log("⚠️ Target server offline")
+    currentServerStatus=0
   });
 
 app.use((req, res, next) => {
@@ -147,26 +147,59 @@ app.use((req, res, next) => {
     }
 })
 
+//remove the x-powered-by header
+app.disable("x-powered-by");
+
 
 //final response when every security layer is passed
 app.use(async (req, res, next) => {
-    let responseFinal = await fetch(settingsData.targetURL, {
+    await fetch(settingsData.targetURL+req.path, {
         method: (req.method).toString(),
         headers: req.headers as HeadersInit,
-        body: req.body? JSON.stringify(req.body) : null,
-    }).then(response => response.json())
-    .then((response)=>{
-        console.log(response.json)
-        response.body.pipe(res);
+        body: req.body? JSON.stringify(req.body): null,
+    }).then((response: any)=>{
+        response.headers.forEach((value: string, key: string) => {
+            const lowerkey = key.toLowerCase()
+
+            const headerblocklist = [
+                'content-encoding',
+                'content-length',   
+                'transfer-encoding',
+                'connection',
+                'keep-alive',
+                'x-powered-by'
+            ]
+
+            if(!headerblocklist.includes(lowerkey)){
+                res.setHeader(key, value)
+            }
+        })
+        
+        res.status(response.status)
+        if (!response.body){
+            return res.end()
+        }
+        
+        const stream = Readable.fromWeb(response.body as any)
+        stream.pipe(res)
+        next()
     })
 });
 
 
 app.listen(settingsData.port, () => {
-    console.log("Server is running on port "+settingsData.port);
+    console.log("Service is running on port "+settingsData.port);
     console.log("Forwarding port: "+settingsData.target)
     console.log("URL: "+settingsData.targetURL)
 })
 
 //mainfunction end
 }
+
+
+//to add :
+// rate-limiter
+// cookie-encrypter
+// load queuer
+// load balancer
+// admin panel
