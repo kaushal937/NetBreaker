@@ -11,6 +11,9 @@ import { Readable } from 'stream';
 import allmisc from './miscellaneous/allmisc';
 import {getsetting} from "./config/getsettings";
 
+//middlewares
+import {requestRateCounter, refreshCounterAndUpdateRate} from './middlewares/requestRateCounter'
+
 
 //config settings
 let settingsData:settings = {
@@ -152,8 +155,8 @@ app.disable("x-powered-by");
 
 
 //requests-per-second-counter
-const requestRateCounter = 
-app.use
+app.use(requestRateCounter)
+refreshCounterAndUpdateRate()
 
 
 //final response when every security layer is passed
