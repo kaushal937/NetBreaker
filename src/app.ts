@@ -151,6 +151,11 @@ app.use((req, res, next) => {
 app.disable("x-powered-by");
 
 
+//requests-per-second-counter
+const requestRateCounter = 
+app.use
+
+
 //final response when every security layer is passed
 app.use(async (req, res, next) => {
     await fetch(settingsData.targetURL+req.path, {
