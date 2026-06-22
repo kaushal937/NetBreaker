@@ -1,5 +1,12 @@
 node_modules
 .env
-dist
+dist/config/getsettings.js
+dist/cookieText_encrypter
+dist/fitstar
+dist/interfaces
+dist/middlewares
+dist/miscellaneous
+dist/status
+dist/app.js
 appt.ts
 bin
