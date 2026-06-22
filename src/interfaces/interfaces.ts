@@ -5,6 +5,7 @@ interface settings{
     currentServerStatus : number
     hostOS: string;
     targetURL: string;
+    cipherkey: string
 }
 
 interface memoryUsageStats{

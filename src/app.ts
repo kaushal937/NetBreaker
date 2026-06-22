@@ -12,6 +12,7 @@ import allmisc from './miscellaneous/allmisc';
 import {getsetting} from "./config/getsettings";
 import {assignTargetServerStatus} from './middlewares/stats/targetServerStatus'
 import {memoryUsageMonitor} from './middlewares/stats/computingPowerUsage'
+import {fitstar, fitstarUnlock} from './fitstar/fitstar';
 
 //middlewares
 import {requestRateCounter, refreshCounterAndUpdateRate} from './middlewares/stats/requestRateCounter'
@@ -23,10 +24,11 @@ let settingsData:settings = {
     runningStatus : 0,
     currentServerStatus : 0,
     hostOS: "string",
-    targetURL : "string"
+    targetURL : "string",
+    cipherkey : ""
 }
 
-let settingsChecklistRequirement:number = 5
+let settingsChecklistRequirement:number = 6
 let settingsChecklist:number = 0
 
 function waitstatus(){
@@ -86,6 +88,17 @@ getsetting("status", (err: NodeJS.ErrnoException | null, data : string | null)=>
         return
     }else{
         settingsData.runningStatus = parseInt(data ?? "0")
+        settingsChecklist++;
+        gonext()
+    }
+})
+
+getsetting("cipherkey", (err: NodeJS.ErrnoException | null, data : string | null)=>{
+    if(err){
+        console.log(err)
+        return
+    }else{
+        settingsData.cipherkey = data?.toString() || ""
         settingsChecklist++;
         gonext()
     }

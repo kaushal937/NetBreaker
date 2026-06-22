@@ -8,6 +8,21 @@ interface Config{
 
 let varlist:Config[] = [];
 
+function sumMultipleLength(inp: any){
+    let sumM: string = ""
+
+    for (let i = 1; i < inp.length; i++) {
+        if(i>1){
+            sumM = sumM + "=" + inp?.[i];
+        }else{
+            sumM = sumM + inp?.[i];
+        }
+        if(i+1 == inp.length){
+            return sumM
+        }
+    }
+}
+
 async function getsetting(name:string, cb:(err: NodeJS.ErrnoException | null, data: string | null) => void){
     if(varlist.length == 0){
         //settings are not initialized
@@ -22,7 +37,7 @@ async function getsetting(name:string, cb:(err: NodeJS.ErrnoException | null, da
                     var key = temppair?.[0] ?? ""
                     orderpair = {
                         settingname: key,
-                        settingvalue: temppair?.[1]
+                        settingvalue: sumMultipleLength(temppair) || ""
                     }
 
                     varlist.push(orderpair)
