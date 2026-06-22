@@ -4,16 +4,17 @@ import fs from 'fs';
 import path from 'path';
 import bodyParser from 'body-parser';
 import cookieparser from 'cookie-parser';
-import settings from './interfaces/interfaces';
+import {settings} from './interfaces/interfaces';
 import os from 'os';
 import { Readable } from 'stream';
 
 import allmisc from './miscellaneous/allmisc';
 import {getsetting} from "./config/getsettings";
+import {assignTargetServerStatus} from './middlewares/stats/targetServerStatus'
+import {memoryUsageMonitor} from './middlewares/stats/computingPowerUsage'
 
 //middlewares
-import {requestRateCounter, refreshCounterAndUpdateRate} from './middlewares/requestRateCounter'
-
+import {requestRateCounter, refreshCounterAndUpdateRate} from './middlewares/stats/requestRateCounter'
 
 //config settings
 let settingsData:settings = {
@@ -127,24 +128,26 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 //layer 1: catches if the server is offline
-let currentServerStatus:number;
-
-fetch(settingsData.targetURL+"/")
+function checkTargetServerStatus(){
+    fetch(settingsData.targetURL+"/")
   .then(response => {
-    currentServerStatus=1
+    settingsData.currentServerStatus=1
   })
   .catch(error => {
     console.log("⚠️ Target server offline")
-    currentServerStatus=0
+    settingsData.currentServerStatus=0
   });
+}
+checkTargetServerStatus()
 
 app.use((req, res, next) => {
-    if(settingsData.runningStatus == 1 && currentServerStatus == 1){
+    if(settingsData.runningStatus == 1 && settingsData.currentServerStatus == 1){
         next()
     }else if(settingsData.runningStatus != 1){
         res.render("renderError", {errno:400, msg:"Server is offline"})
-    }else if(currentServerStatus != 1){
+    }else if(settingsData.currentServerStatus != 1){
         res.render("renderError", {errno:400, msg:"Server is currently unavailable"})
+        checkTargetServerStatus()
     }else{
         res.render("renderError", {errno:400, msg:"internal server error(s)"})
     }
@@ -156,7 +159,11 @@ app.disable("x-powered-by");
 
 //requests-per-second-counter
 app.use(requestRateCounter)
-refreshCounterAndUpdateRate()
+refreshCounterAndUpdateRate()   //to initiate the request counter
+
+
+//memory-usage-updater
+memoryUsageMonitor()
 
 
 //final response when every security layer is passed
@@ -166,6 +173,14 @@ app.use(async (req, res, next) => {
         headers: req.headers as HeadersInit,
         body: req.body? JSON.stringify(req.body): null,
     }).then((response: any)=>{
+        if(response.ok || response.status == "304"){
+            settingsData.currentServerStatus=1
+            assignTargetServerStatus(settingsData.currentServerStatus)
+        }else{
+            settingsData.currentServerStatus=0
+            assignTargetServerStatus(settingsData.currentServerStatus)
+        }
+
         response.headers.forEach((value: string, key: string) => {
             const lowerkey = key.toLowerCase()
 
@@ -187,10 +202,13 @@ app.use(async (req, res, next) => {
         if (!response.body){
             return res.end()
         }
-        
+
         const stream = Readable.fromWeb(response.body as any)
         stream.pipe(res)
         next()
+    }).catch((err)=>{
+        settingsData.currentServerStatus=0
+        assignTargetServerStatus(settingsData.currentServerStatus)
     })
 });
 

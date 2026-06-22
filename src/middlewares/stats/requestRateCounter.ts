@@ -1,4 +1,4 @@
-import allmisc from '../miscellaneous/allmisc';
+import allmisc from '../../miscellaneous/allmisc';
 
 var refreshTime = 500    //in milliseconds
 let rate = 0             //in requests per second
@@ -17,4 +17,4 @@ function requestRateCounter(req: any, res: any, next: any){
     next()
 }
 
-export {requestRateCounter, refreshCounterAndUpdateRate}
+export {requestRateCounter, refreshCounterAndUpdateRate, rate}

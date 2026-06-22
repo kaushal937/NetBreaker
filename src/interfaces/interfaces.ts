@@ -7,4 +7,11 @@ interface settings{
     targetURL: string;
 }
 
-export default settings
+interface memoryUsageStats{
+    memory : string
+}
+
+export {
+    settings,
+    memoryUsageStats
+}
