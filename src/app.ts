@@ -229,7 +229,7 @@ app.use(async (req, res, next) => {
 app.listen(settingsData.port, () => {
     console.log("Service is running on port "+settingsData.port);
     console.log("Forwarding port: "+settingsData.target)
-    console.log("URL: "+settingsData.targetURL)
+    console.log("URL: "+"http://127.0.0.1:"+settingsData.port)
 })
 
 //mainfunction end
