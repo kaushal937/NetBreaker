@@ -6,6 +6,8 @@ import bodyParser from 'body-parser';
 import cookieparser from 'cookie-parser';
 import {settings} from './interfaces/interfaces';
 import os from 'os';
+import setCookieParser from 'set-cookie-parser'
+import * as cookie from 'cookie'
 import { Readable } from 'stream';
 
 import allmisc from './miscellaneous/allmisc';
@@ -16,6 +18,7 @@ import {fitstar, fitstarUnlock} from './fitstar/fitstar';
 
 //middlewares
 import {requestRateCounter, refreshCounterAndUpdateRate} from './middlewares/stats/requestRateCounter'
+import { handleIncomingCookie, handleOutGoingCookie } from './middlewares/cookieEncryption/cookieEncrypt';
 
 //config settings
 let settingsData:settings = {
@@ -25,10 +28,11 @@ let settingsData:settings = {
     currentServerStatus : 0,
     hostOS: "string",
     targetURL : "string",
-    cipherkey : ""
+    cipherkey : "",
+    cookieEncryption : 1
 }
 
-let settingsChecklistRequirement:number = 6
+let settingsChecklistRequirement:number = 7
 let settingsChecklist:number = 0
 
 function waitstatus(){
@@ -104,14 +108,6 @@ getsetting("cipherkey", (err: NodeJS.ErrnoException | null, data : string | null
     }
 })
 
-try{
-    settingsData.hostOS = os.platform()
-    settingsChecklist++;
-    gonext()
-}finally{
-    gonext()
-}
-
 getsetting("target", (err: NodeJS.ErrnoException | null, data: string | null)=>{
     if(err){
         console.log(err)
@@ -122,6 +118,26 @@ getsetting("target", (err: NodeJS.ErrnoException | null, data: string | null)=>{
         gonext()
     }
 })
+
+getsetting("encryptoption", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+    if(err){
+        console.log(err)
+        return
+    }else{
+        (data)? allmisc.boolToNumber((data === "true")) : settingsData.cookieEncryption = parseInt(data ?? "1")
+        settingsData.cookieEncryption = parseInt(data ?? "1")
+        settingsChecklist++;
+        gonext()
+    }
+})
+
+try{
+    settingsData.hostOS = os.platform()
+    settingsChecklist++;
+    gonext()
+}finally{
+    gonext()
+}
 
 
 
@@ -179,6 +195,12 @@ refreshCounterAndUpdateRate()   //to initiate the request counter
 memoryUsageMonitor()
 
 
+//cookiehandlers
+app.use(handleIncomingCookie(settingsData.cipherkey, settingsData.cookieEncryption))
+
+
+
+
 //final response when every security layer is passed
 app.use(async (req, res, next) => {
     await fetch(settingsData.targetURL+req.path, {
@@ -210,6 +232,9 @@ app.use(async (req, res, next) => {
                 res.setHeader(key, value)
             }
         })
+
+        res.setHeader("Set-Cookie", handleOutGoingCookie(response, settingsData.cipherkey, settingsData.cookieEncryption));
+        
         
         res.status(response.status)
         if (!response.body){

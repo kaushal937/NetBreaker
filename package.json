@@ -35,9 +35,11 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
+    "cookie": "^1.1.1",
     "cookie-parser": "^1.4.7",
     "ejs": "^6.0.1",
     "express": "^5.2.1",
-    "helmet": "^8.2.0"
+    "helmet": "^8.2.0",
+    "set-cookie-parser": "^3.1.1"
   }
 }

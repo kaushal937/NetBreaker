@@ -13,8 +13,13 @@ function breakline(){
         return "\r"
     }
 }
+
+function boolToNumber(booleanValue: boolean){
+    (booleanValue == true)? 1 :  0
+}
  
 export default {
     breakline,
-    sleep
+    sleep,
+    boolToNumber
 }
