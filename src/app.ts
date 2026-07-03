@@ -1,150 +1,27 @@
 import express from 'express';
-import ejs, { render } from 'ejs';
-import fs from 'fs';
 import path from 'path';
 import bodyParser from 'body-parser';
 import cookieparser from 'cookie-parser';
-import {settings} from './interfaces/interfaces';
-import os from 'os';
-import setCookieParser from 'set-cookie-parser'
-import * as cookie from 'cookie'
 import { Readable } from 'stream';
 
 import allmisc from './miscellaneous/allmisc';
 import Stats from './middlewares/stats/allStats'
-import {getsetting} from "./config/getsettings";
 import {assignTargetServerStatus} from './middlewares/stats/targetServerStatus'
 import {memoryUsageMonitor} from './middlewares/stats/computingPowerUsage'
-import {fitstar, fitstarUnlock} from './fitstar/fitstar';
+import initialize from './config/initialize';
+import {settingsData} from './config/initialize'
 
 //middlewares
 import {requestRateCounter, refreshCounterAndUpdateRate} from './middlewares/stats/requestRateCounter'
 import { handleIncomingCookie, handleOutGoingCookie } from './middlewares/cookieEncryption/cookieEncrypt';
+import { limitRateTo } from './middlewares/ratelimiting/ratelimiting'
 
 //config settings
-let settingsData:settings = {
-    target : 0,
-    port : 0,
-    runningStatus : 0,
-    currentServerStatus : 0,
-    hostOS: "string",
-    targetURL : "string",
-    cipherkey : "",
-    cookieEncryption : 1
-}
-
-let settingsChecklistRequirement:number = 7
-let settingsChecklist:number = 0
-
-function waitstatus(){
-    if(settingsChecklist == settingsChecklistRequirement){
-        return true
-    }else{
-        return false
-    }
-}
-
-function gonext(){
-    waitstatus()? confirmSets() : null
-}
-
-async function confirmSets(){
-    //console settings to confirm
-    console.log(settingsData)
-    console.log(allmisc.breakline())
-    console.log("is this OK? If not, press Ctrl+C")
-
-    for(let i=0; i>0; i--){                                //to set i=9
-        console.log(`Starting server in ${i} seconds...`)
-        await allmisc.sleep(1000);
-    }
-
-    console.log("initializing...")
-    console.log(allmisc.breakline())
-
-    mainFunction()
-}
-
-getsetting("target", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-    if(err){
-        console.log(err)
-        return
-    }else{
-        settingsData.target = parseInt(data ?? "3000")
-        settingsChecklist++;
-        gonext()
-    }
-})
-
-getsetting("port", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-    if(err){
-        console.log(err)
-        return
-    }else{
-        settingsData.port = parseInt(data ?? "0")
-        settingsChecklist++;
-        gonext()
-    }
-})
-
-getsetting("status", (err: NodeJS.ErrnoException | null, data : string | null)=>{
-    if(err){
-        console.log(err)
-        return
-    }else{
-        settingsData.runningStatus = parseInt(data ?? "0")
-        settingsChecklist++;
-        gonext()
-    }
-})
-
-getsetting("cipherkey", (err: NodeJS.ErrnoException | null, data : string | null)=>{
-    if(err){
-        console.log(err)
-        return
-    }else{
-        settingsData.cipherkey = data?.toString() || ""
-        settingsChecklist++;
-        gonext()
-    }
-})
-
-getsetting("target", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-    if(err){
-        console.log(err)
-        return
-    }else{
-        settingsData.targetURL = ("http://localhost:"+parseInt(data ?? "0"))
-        settingsChecklist++;
-        gonext()
-    }
-})
-
-getsetting("cookieEncryptOption", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-    if(err){
-        console.log(err)
-        return
-    }else{
-        (data)? allmisc.boolToNumber((data === "true")) : settingsData.cookieEncryption = parseInt(data ?? "1")
-        settingsData.cookieEncryption = parseInt(data ?? "1")
-        settingsChecklist++;
-        gonext()
-    }
-})
-
-try{
-    settingsData.hostOS = os.platform()
-    settingsChecklist++;
-    gonext()
-}finally{
-    gonext()
-}
-
-
-
+initialize.initializeSettings(8, mainFunction)
 
 //main function of the module; runs only when everythings alright, configs are loaded and other checklists are completed
 async function mainFunction(){
+
 //mainfunction start
 
 const app = express();
@@ -157,7 +34,15 @@ app.use(express.urlencoded({extended : false}));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-//layer 1: catches if the server is offline
+
+//====layer 1 : rate-limiting
+app.use(limitRateTo(settingsData.maxRequestRateLimit))
+
+
+//====layer 2 : memory limiting/load queuer
+
+
+//====layer 2: catches if the server is offline
 function checkTargetServerStatus(){
     fetch(settingsData.targetURL+"/")
   .then(response => {
@@ -183,9 +68,14 @@ app.use((req, res, next) => {
     }
 })
 
+
+//====layer 3 : remove unnecessary headers
+
 //remove the x-powered-by header
 app.disable("x-powered-by");
 
+
+//====layer 4 : Stats
 
 //requests-per-second-counter
 app.use(requestRateCounter)
@@ -194,15 +84,11 @@ refreshCounterAndUpdateRate()   //to initiate the request counter
 //Log Stats
 // Stats.LogStats(1000)
 
-
-//memory-usage-updater
+// memory-usage-updater
 memoryUsageMonitor()
 
-
-//cookiehandlers
+//====layer 5 : cookiehandlers
 app.use(handleIncomingCookie(settingsData.cipherkey, settingsData.cookieEncryption))
-
-
 
 
 //final response when every security layer is passed

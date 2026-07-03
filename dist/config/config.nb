@@ -3,3 +3,4 @@ port=80
 target=8000
 cipherkey=(UseYourOwnKey;stringoflength32)
 cookieEncryptOption=1
+maxRequestRateLimit=140

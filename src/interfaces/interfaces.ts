@@ -6,7 +6,8 @@ interface settings{
     hostOS: string;
     targetURL: string;
     cipherkey: string;
-    cookieEncryption : number
+    cookieEncryption : number;
+    maxRequestRateLimit : number;
 }
 
 interface memoryUsageStats{
