@@ -11,6 +11,7 @@ import * as cookie from 'cookie'
 import { Readable } from 'stream';
 
 import allmisc from './miscellaneous/allmisc';
+import Stats from './middlewares/stats/allStats'
 import {getsetting} from "./config/getsettings";
 import {assignTargetServerStatus} from './middlewares/stats/targetServerStatus'
 import {memoryUsageMonitor} from './middlewares/stats/computingPowerUsage'
@@ -119,7 +120,7 @@ getsetting("target", (err: NodeJS.ErrnoException | null, data: string | null)=>{
     }
 })
 
-getsetting("encryptoption", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+getsetting("cookieEncryptOption", (err: NodeJS.ErrnoException | null, data: string | null)=>{
     if(err){
         console.log(err)
         return
@@ -189,6 +190,9 @@ app.disable("x-powered-by");
 //requests-per-second-counter
 app.use(requestRateCounter)
 refreshCounterAndUpdateRate()   //to initiate the request counter
+
+//Log Stats
+// Stats.LogStats(1000)
 
 
 //memory-usage-updater
@@ -263,7 +267,6 @@ app.listen(settingsData.port, () => {
 
 //to add :
 // rate-limiter
-// cookie-encrypter
 // load queuer
 // load balancer
 // admin panel
