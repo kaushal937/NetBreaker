@@ -10,6 +10,9 @@ import {assignTargetServerStatus} from './middlewares/stats/targetServerStatus'
 import {memoryUsageMonitor} from './middlewares/stats/computingPowerUsage'
 import initialize from './config/initialize';
 import {settingsData} from './config/initialize'
+import ServerStatusModule from './controllers/serverStatus/serverStatus'
+import ServiceStatusManager from './middlewares/serverStatusMoniterManager/serverStatusManager'
+import LogOnStart from './controllers/logOnStart/logOnStart'
 
 //middlewares
 import {requestRateCounter, refreshCounterAndUpdateRate} from './middlewares/stats/requestRateCounter'
@@ -17,7 +20,7 @@ import { handleIncomingCookie, handleOutGoingCookie } from './middlewares/cookie
 import { limitRateTo } from './middlewares/ratelimiting/ratelimiting'
 
 //config settings
-initialize.initializeSettings(8, mainFunction)
+initialize.initializeSettings(0, mainFunction)
 
 //main function of the module; runs only when everythings alright, configs are loaded and other checklists are completed
 async function mainFunction(){
@@ -38,35 +41,13 @@ app.set('views', path.join(__dirname, 'views'));
 //====layer 1 : rate-limiting
 app.use(limitRateTo(settingsData.maxRequestRateLimit))
 
-
 //====layer 2 : memory limiting/load queuer
 
 
 //====layer 2: catches if the server is offline
-function checkTargetServerStatus(){
-    fetch(settingsData.targetURL+"/")
-  .then(response => {
-    settingsData.currentServerStatus=1
-  })
-  .catch(error => {
-    console.log("⚠️ Target server offline")
-    settingsData.currentServerStatus=0
-  });
-}
-checkTargetServerStatus()
+ServerStatusModule.checkTargetServerStatus()
 
-app.use((req, res, next) => {
-    if(settingsData.runningStatus == 1 && settingsData.currentServerStatus == 1){
-        next()
-    }else if(settingsData.runningStatus != 1){
-        res.render("renderError", {errno:400, msg:"Server is offline"})
-    }else if(settingsData.currentServerStatus != 1){
-        res.render("renderError", {errno:400, msg:"Server is currently unavailable"})
-        checkTargetServerStatus()
-    }else{
-        res.render("renderError", {errno:400, msg:"internal server error(s)"})
-    }
-})
+app.use(ServiceStatusManager.handleServiceStatus)
 
 
 //====layer 3 : remove unnecessary headers
@@ -142,9 +123,7 @@ app.use(async (req, res, next) => {
 
 
 app.listen(settingsData.port, () => {
-    console.log("Service is running on port "+settingsData.port);
-    console.log("Forwarding port: "+settingsData.target)
-    console.log("URL: "+"http://127.0.0.1:"+settingsData.port)
+    LogOnStart.logOnStart()
 })
 
 //mainfunction end
@@ -152,7 +131,8 @@ app.listen(settingsData.port, () => {
 
 
 //to add :
-// rate-limiter
 // load queuer
 // load balancer
 // admin panel
+
+//when an ip is added to whitelist by admin panel, update the ipwhitelist.nb file at that moment only

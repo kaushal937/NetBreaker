@@ -8,6 +8,8 @@ dist/middlewares
 dist/miscellaneous
 dist/status
 dist/cookieEncryption
+dist/controllers
 dist/app.js
+.vscode
 appt.ts
 bin
