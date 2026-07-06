@@ -1,30 +1,37 @@
 import IpListReader from '../../controllers/ipListModule/ipListParser'
+import { ipBlackList, ipWhiteList } from '../../config/initialize'
 
-function ipWhitelist(cb: any){
-    IpListReader.readWhiteList((data: string[])=>{
-        cb(data)
-    })
+function ipWhitelistFilter(incomingIP: string){
+    if(ipWhiteList.includes(incomingIP)){
+        return true
+    }else{
+        return false
+    }
 }
 
-function ipBlacklist(cb: any){
-    IpListReader.readBlackList((data: string[])=>{
-        cb(data)
-    })
+function ipBlacklistFilter(incomingIP: string){
+    if(!ipWhiteList.includes(incomingIP)){
+        return true
+    }else{
+        return false
+    }
 }
 
 function filterOrigin(inspectionType: string){
     let typeOfFiltering: string 
-    if(inspectionType.toLowerCase() == "bl"){
+    if(inspectionType.toLowerCase() == "blacklist"){
         typeOfFiltering = "bl"
     }else{
         typeOfFiltering = "wl"
     }
     return (req: any, res: any, next: any)=>{
-        next()
+        if(typeOfFiltering == "bl"){
+            (ipBlacklistFilter(req.ip.toString()?? "null"))? next() : res.status(403).end()
+        }else{
+            (ipWhitelistFilter(req.ip.toString()?? "null"))? next() : res.status(403).end()
+        }
     }
 }
-
-
 
 export default {
     filterOrigin

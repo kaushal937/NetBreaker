@@ -41,31 +41,31 @@ app.set('views', path.join(__dirname, 'views'));
 //====layer 1 : Origin Inspecter
 app.use(OriginFiltering.filterOrigin(settingsData.inspectOriginMode))
 
-//====layer 1 : rate-limiting
+//====layer 2 : rate-limiting
 app.use(limitRateTo(settingsData.maxRequestRateLimit))
 
-//====layer 2 : memory limiting/load queuer
+//====layer 3 : memory limiting/load queuer
 
 
-//====layer 2: catches if the server is offline
+//====layer 4: catches if the server is offline
 ServerStatusModule.checkTargetServerStatus()
 app.use(ServiceStatusManager.handleServiceStatus())
 
 
-//====layer 3 : remove unnecessary headers
+//====layer 5 : remove unnecessary headers
 app.disable("x-powered-by");
 
-//====layer 4 : Stats
+//====layer 6 : Stats
 app.use(requestRateCounter)
 refreshCounterAndUpdateRate()   //to initiate the request counter
 
 //Log Stats
-// Stats.LogStats(1000)
+Stats.LogStats(1000)                     //for development phase and testing
 
 // memory-usage-updater
 memoryUsageMonitor()
 
-//====layer 5 : cookiehandlers
+//====layer 7 : cookiehandlers
 app.use(handleIncomingCookie(settingsData.cipherkey, settingsData.cookieEncryption))
 
 //final response when every security layer is passed
@@ -127,9 +127,11 @@ app.listen(settingsData.port, () => {
 
 
 //to add :
-// load queuer
+// load queuer (based on memory usage)
 // load balancer
 // admin panel
 //add a packet inspector
+//fix rate limiter
 
 //when an ip is added to whitelist by admin panel, update the ipwhitelist.nb file at that moment only
+//add a lightweight standbymode when NetBreaker is off, ie status=0 or currentServerStatus=0, which responds as res.end()
