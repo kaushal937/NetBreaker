@@ -2,6 +2,7 @@ import {settings} from '../interfaces/interfaces';
 import allmisc from '../miscellaneous/allmisc';
 import {getsetting} from "./getsettings";
 import os from 'os'
+import ipListReaders from '../controllers/ipListModule/ipListParser'
 
 let settingsData:settings = {
     target : 0,
@@ -12,10 +13,14 @@ let settingsData:settings = {
     targetURL : "string",
     cipherkey : "",
     cookieEncryption : 1,
-    maxRequestRateLimit : 5000
+    maxRequestRateLimit : 5000,
+    inspectOriginMode: "wl"
 }
 
-let settingsChecklistRequirement: number = 8
+let ipBlackList: string[]
+let ipWhiteList: string[]
+
+let settingsChecklistRequirement: number = 9
 let settingsChecklist: number = 0
 
 function waitstatus(){
@@ -119,6 +124,16 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
                 gonext()
             }
         })
+        getsetting("inspectOriginMode", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+            if(err){
+                console.log(err)
+                return
+            }else{
+                settingsData.inspectOriginMode = data?? "wl"
+                settingsChecklist++;
+                gonext()
+            }
+        })
         try{
             settingsData.hostOS = os.platform()
             settingsChecklist++;
@@ -126,10 +141,21 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
         }finally{
             gonext()
         }
+        try{
+            ipListReaders.readBlackList((List: string[])=>{
+                ipBlackList = List
+            })
+            ipListReaders.readWhiteList((List: string[])=>{
+                ipWhiteList = List
+            })
+        }catch(e){
+            ipBlackList = ["error"]
+            ipWhiteList = ["error"]
+        }
     }catch(e){
         return 0
     }
 }
 
 export default { initializeSettings }
-export { settingsData }
+export { settingsData, ipBlackList, ipWhiteList }

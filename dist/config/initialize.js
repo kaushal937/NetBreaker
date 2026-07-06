@@ -3,10 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.settingsData = void 0;
+exports.ipWhiteList = exports.ipBlackList = exports.settingsData = void 0;
 const allmisc_1 = __importDefault(require("../miscellaneous/allmisc"));
 const getsettings_1 = require("./getsettings");
 const os_1 = __importDefault(require("os"));
+const ipListParser_1 = __importDefault(require("../controllers/ipListModule/ipListParser"));
 let settingsData = {
     target: 0,
     port: 0,
@@ -16,10 +17,13 @@ let settingsData = {
     targetURL: "string",
     cipherkey: "",
     cookieEncryption: 1,
-    maxRequestRateLimit: 5000
+    maxRequestRateLimit: 5000,
+    inspectOriginMode: "wl"
 };
 exports.settingsData = settingsData;
-let settingsChecklistRequirement = 8;
+let ipBlackList;
+let ipWhiteList;
+let settingsChecklistRequirement = 9;
 let settingsChecklist = 0;
 function waitstatus() {
     if (settingsChecklist == settingsChecklistRequirement) {
@@ -127,6 +131,17 @@ function initializeSettings(waitTimeBeforeStarting, mainCallBack) {
                 gonext();
             }
         });
+        (0, getsettings_1.getsetting)("inspectOriginMode", (err, data) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            else {
+                settingsData.inspectOriginMode = data ?? "wl";
+                settingsChecklist++;
+                gonext();
+            }
+        });
         try {
             settingsData.hostOS = os_1.default.platform();
             settingsChecklist++;
@@ -134,6 +149,18 @@ function initializeSettings(waitTimeBeforeStarting, mainCallBack) {
         }
         finally {
             gonext();
+        }
+        try {
+            ipListParser_1.default.readBlackList((List) => {
+                exports.ipBlackList = ipBlackList = List;
+            });
+            ipListParser_1.default.readWhiteList((List) => {
+                exports.ipWhiteList = ipWhiteList = List;
+            });
+        }
+        catch (e) {
+            exports.ipBlackList = ipBlackList = ["error"];
+            exports.ipWhiteList = ipWhiteList = ["error"];
         }
     }
     catch (e) {

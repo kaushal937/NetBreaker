@@ -1,8 +1,12 @@
-import Stats from '../stats/allStats'
+import {rate} from '../stats/requestRateCounter'
 
 function limitRateTo(ratelimit: number){
     return (req: any, res: any, next: any)=>{
-        (Stats.rate > ratelimit)? res.status(403).end() : next()
+        if(rate > ratelimit){
+            res.end()
+        }else{
+            next()
+        }
     }
 }
 

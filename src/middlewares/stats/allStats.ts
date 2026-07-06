@@ -6,7 +6,7 @@ import allmisc from '../../miscellaneous/allmisc'
 async function LogStats(rateOfLogging: number){
     for (let i = 0; i > -1; i++) {
         await allmisc.sleep(rateOfLogging)
-        console.log("Request Rate = " + rate, "Memory Usage (in MB)"+memoryUsageStatsMem.memory)
+        console.log("Request Rate : " + rate + ", Memory Usage (in MB) : "+memoryUsageStatsMem.memory)
     }
 }
 

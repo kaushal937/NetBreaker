@@ -13,6 +13,7 @@ import {settingsData} from './config/initialize'
 import ServerStatusModule from './controllers/serverStatus/serverStatus'
 import ServiceStatusManager from './middlewares/serverStatusMoniterManager/serverStatusManager'
 import LogOnStart from './controllers/logOnStart/logOnStart'
+import OriginFiltering from './middlewares/originFiltering/ipBasedFiltering'
 
 //middlewares
 import {requestRateCounter, refreshCounterAndUpdateRate} from './middlewares/stats/requestRateCounter'
@@ -37,6 +38,8 @@ app.use(express.urlencoded({extended : false}));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+//====layer 1 : Origin Inspecter
+app.use(OriginFiltering.filterOrigin(settingsData.inspectOriginMode))
 
 //====layer 1 : rate-limiting
 app.use(limitRateTo(settingsData.maxRequestRateLimit))
@@ -46,19 +49,13 @@ app.use(limitRateTo(settingsData.maxRequestRateLimit))
 
 //====layer 2: catches if the server is offline
 ServerStatusModule.checkTargetServerStatus()
-
-app.use(ServiceStatusManager.handleServiceStatus)
+app.use(ServiceStatusManager.handleServiceStatus())
 
 
 //====layer 3 : remove unnecessary headers
-
-//remove the x-powered-by header
 app.disable("x-powered-by");
 
-
 //====layer 4 : Stats
-
-//requests-per-second-counter
 app.use(requestRateCounter)
 refreshCounterAndUpdateRate()   //to initiate the request counter
 
@@ -70,7 +67,6 @@ memoryUsageMonitor()
 
 //====layer 5 : cookiehandlers
 app.use(handleIncomingCookie(settingsData.cipherkey, settingsData.cookieEncryption))
-
 
 //final response when every security layer is passed
 app.use(async (req, res, next) => {
@@ -134,5 +130,6 @@ app.listen(settingsData.port, () => {
 // load queuer
 // load balancer
 // admin panel
+//add a packet inspector
 
 //when an ip is added to whitelist by admin panel, update the ipwhitelist.nb file at that moment only

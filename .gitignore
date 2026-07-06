@@ -1,8 +1,11 @@
 node_modules
 .env
+.vscode
 dist/config/getsettings.js
+dist/config/initialize.js
 dist/cookieText_encrypter
 dist/fitstar
+dist/ipLists
 dist/interfaces
 dist/middlewares
 dist/miscellaneous
@@ -10,6 +13,5 @@ dist/status
 dist/cookieEncryption
 dist/controllers
 dist/app.js
-.vscode
 appt.ts
 bin

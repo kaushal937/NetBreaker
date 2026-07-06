@@ -1,6 +1,7 @@
-status=1
-port=80
+status=0
+port=443
 target=8000
 cipherkey=(UseYourOwnKey;stringoflength32)
 cookieEncryptOption=1
-maxRequestRateLimit=140
+maxRequestRateLimit=770
+inspectOriginMode=bl

@@ -8,6 +8,7 @@ interface settings{
     cipherkey: string;
     cookieEncryption : number;
     maxRequestRateLimit : number;
+    inspectOriginMode : string;
 }
 
 interface memoryUsageStats{
