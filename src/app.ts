@@ -13,7 +13,8 @@ import {settingsData} from './config/initialize'
 import ServerStatusModule from './controllers/serverStatus/serverStatus'
 import ServiceStatusManager from './middlewares/serverStatusMoniterManager/serverStatusManager'
 import LogOnStart from './controllers/logOnStart/logOnStart'
-import OriginFiltering from './middlewares/originFiltering/ipBasedFiltering'
+import NeutralizeIP from './middlewares/IpModule/ipNeutralization'
+import OriginFiltering from './middlewares/IpModule/ipBasedFiltering'
 
 //middlewares
 import {requestRateCounter, refreshCounterAndUpdateRate} from './middlewares/stats/requestRateCounter'
@@ -38,7 +39,8 @@ app.use(express.urlencoded({extended : false}));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-//====layer 1 : Origin Inspecter
+//====layer 1 : Ip Normalization & Origin Inspecter
+app.use(NeutralizeIP.neutralizeIPv4AndIPv6)       //Adds req.normalIP, IP address regardless of IPv4 or IPv6
 app.use(OriginFiltering.filterOrigin(settingsData.inspectOriginMode))
 
 //====layer 2 : rate-limiting
@@ -101,8 +103,7 @@ app.use(async (req, res, next) => {
         })
 
         res.setHeader("Set-Cookie", handleOutGoingCookie(response, settingsData.cipherkey, settingsData.cookieEncryption));
-        
-        
+
         res.status(response.status)
         if (!response.body){
             return res.end()
@@ -132,6 +133,8 @@ app.listen(settingsData.port, () => {
 // admin panel
 //add a packet inspector
 //fix rate limiter
+//for authentication of admin, he/she will send a request access, and NB will send a random hash key, for every request, and then the admin will send the credentials in that hashed form, and NB will authorize it. one hash key for every request, and different for every IP address
 
 //when an ip is added to whitelist by admin panel, update the ipwhitelist.nb file at that moment only
 //add a lightweight standbymode when NetBreaker is off, ie status=0 or currentServerStatus=0, which responds as res.end()
+//cookie encryption is working all good

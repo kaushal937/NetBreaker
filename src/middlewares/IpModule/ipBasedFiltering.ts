@@ -1,4 +1,3 @@
-import IpListReader from '../../controllers/ipListModule/ipListParser'
 import { ipBlackList, ipWhiteList } from '../../config/initialize'
 
 function ipWhitelistFilter(incomingIP: string){
@@ -10,7 +9,7 @@ function ipWhitelistFilter(incomingIP: string){
 }
 
 function ipBlacklistFilter(incomingIP: string){
-    if(!ipWhiteList.includes(incomingIP)){
+    if(!ipBlackList.includes(incomingIP)){
         return true
     }else{
         return false
@@ -26,9 +25,9 @@ function filterOrigin(inspectionType: string){
     }
     return (req: any, res: any, next: any)=>{
         if(typeOfFiltering == "bl"){
-            (ipBlacklistFilter(req.ip.toString()?? "null"))? next() : res.status(403).end()
+            (ipBlacklistFilter(req.normalIP.toString()?? "null"))? next() : res.status(403).end()
         }else{
-            (ipWhitelistFilter(req.ip.toString()?? "null"))? next() : res.status(403).end()
+            (ipWhitelistFilter(req.normalIP.toString()?? "null"))? next() : res.status(403).end()
         }
     }
 }
