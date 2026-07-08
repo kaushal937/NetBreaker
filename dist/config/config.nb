@@ -4,4 +4,4 @@ target=8000
 cipherkey=(UseYourOwnKey;stringoflength32)
 cookieEncryptOption=1
 maxRequestRateLimit=770
-inspectOriginMode=blacklist
+inspectOriginMode=whitelist

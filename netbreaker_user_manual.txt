@@ -1,32 +1,27 @@
-This is a Reverse Proxy.
-
-If you want to contribute, go ahead
-
-User Manual:
-Read the netbreaker_user_manual.txt file in the root directory of the project
-
-or read here:
-
 1. Config file - how to configure your reverse proxy
 
+
 ->status
-format - status=0/1
+    format - status=0/1
 
     0 refers to off and 1 refers to on. In off mode, every request will
     be rejected, regardless of the status of the main/target server.
 
+
 ->port
-format - port=1234 (number of the port)
+    format - port=1234   (number of the port)
 
     It is the local port number on which the proxy will operate
 
+
 ->target
-format - target=1234
+    format - target=1234
 
     It is the local port number on which the main/target server runs on
 
+
 ->cipherkey
-format - cipherkey=0123456789abcdefghijklmnopqrstuv (string of 32 characters)
+    format - cipherkey=0123456789abcdefghijklmnopqrstuv    (string of 32 characters)
 
     It is the cipher key used for AES-256-GCM encryption of cookies. It
     uses a 32 bytes buffer, which is derived from this cipherkey string.
@@ -34,16 +29,18 @@ format - cipherkey=0123456789abcdefghijklmnopqrstuv (string of 32 characters)
     special characters and numbers.
     This cipher key should not be leaked or shared, or else security can be breached
 
+
 ->cookieEncryptOption
-format - cookieEncryptOption=0/1
+    format - cookieEncryptOption=0/1
 
     0 refers to no and 1 refers to yes. Enabling this will make the value of the
     cookies coming from the target server encrypted and stay in the encrypted format
     in the user's browser. However, the target server will receive cookie values in plain
     text format in forwarded requests.
 
+
 ->maxRequestRateLimit
-format - maxRequestRateLimit=1000
+    format - maxRequestRateLimit=1000
 
     This reverse proxy uses a ratelimiter which limits the rate of incoming
     requests on 2 basis: requests per second and max memory allowed to be used. This value
@@ -57,8 +54,9 @@ format - maxRequestRateLimit=1000
         500 users - 10000
         (20 per user, for an average website, can vary depending on your target server)
 
+
 ->inspectOriginMode
-format - inspectOriginMode=blacklist/whitelist
+    format - inspectOriginMode=blacklist/whitelist
 
     NetBreaker offers 2 forms of traffic blocking, on the basis of IP addresses.
     Whitelisting will only allow incoming traffic from IP addresses explicitly
