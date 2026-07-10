@@ -39,7 +39,10 @@ app.use(express.urlencoded({extended : false}));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-//====layer 1 : Ip Normalization & Origin Inspecter
+//====layer 1 : Reject requests if NetBreaker is offline (runningStatus=0)
+app.use(ServiceStatusManager.handleServiceStatus())
+
+//====layer 2 : Ip Normalization & Origin Inspecter
 app.use(NeutralizeIP.neutralizeIPv4AndIPv6)       //Adds req.normalIP, IP address regardless of IPv4 or IPv6
 app.use(OriginFiltering.filterOrigin(settingsData.inspectOriginMode))
 
@@ -51,8 +54,7 @@ app.use(limitRateTo(settingsData.maxRequestRateLimit))
 
 //====layer 4: catches if the server is offline
 ServerStatusModule.checkTargetServerStatus()
-app.use(ServiceStatusManager.handleServiceStatus())
-
+app.use(ServiceStatusManager.handleTargetServiceStatus())
 
 //====layer 5 : remove unnecessary headers
 app.disable("x-powered-by");
