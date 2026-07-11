@@ -16,4 +16,7 @@ async function memoryUsageMonitor(){
     }
 }
 
-export {memoryUsageStatsMem, memoryUsageMonitor}
+export default {
+    memoryUsageStatsMem,
+    memoryUsageMonitor
+}

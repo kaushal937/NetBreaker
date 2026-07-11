@@ -7,7 +7,7 @@ import { Readable } from 'stream';
 import allmisc from './miscellaneous/allmisc';
 import Stats from './middlewares/stats/allStats'
 import {assignTargetServerStatus} from './middlewares/stats/targetServerStatus'
-import {memoryUsageMonitor} from './middlewares/stats/computingPowerUsage'
+import ComputerUsage from './middlewares/stats/computingPowerUsage'
 import initialize from './config/initialize';
 import {settingsData} from './config/initialize'
 import ServerStatusModule from './controllers/serverStatus/serverStatus'
@@ -46,20 +46,20 @@ app.use(ServiceStatusManager.handleServiceStatus())
 app.use(NeutralizeIP.neutralizeIPv4AndIPv6)       //Adds req.normalIP, IP address regardless of IPv4 or IPv6
 app.use(OriginFiltering.filterOrigin(settingsData.inspectOriginMode))
 
-//====layer 2 : rate-limiting
+//====layer 3 : rate-limiting
 app.use(limitRateTo(settingsData.maxRequestRateLimit))
 
-//====layer 3 : memory limiting/load queuer
+//====layer 4 : memory limiting/load queuer
 
 
-//====layer 4: catches if the server is offline
+//====layer 5: catches if the server is offline
 ServerStatusModule.checkTargetServerStatus()
 app.use(ServiceStatusManager.handleTargetServiceStatus())
 
-//====layer 5 : remove unnecessary headers
+//====layer 6 : remove unnecessary headers
 app.disable("x-powered-by");
 
-//====layer 6 : Stats
+//====layer 7 : Stats
 app.use(requestRateCounter)
 refreshCounterAndUpdateRate()   //to initiate the request counter
 
@@ -67,9 +67,9 @@ refreshCounterAndUpdateRate()   //to initiate the request counter
 Stats.LogStats(1000)                     //for development phase and testing
 
 // memory-usage-updater
-memoryUsageMonitor()
+ComputerUsage.memoryUsageMonitor()
 
-//====layer 7 : cookiehandlers
+//====layer 8 : cookiehandlers
 app.use(handleIncomingCookie(settingsData.cipherkey, settingsData.cookieEncryption))
 
 //final response when every security layer is passed
