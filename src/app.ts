@@ -2,11 +2,11 @@ import express from 'express';
 import path from 'path';
 import bodyParser from 'body-parser';
 import cookieparser from 'cookie-parser';
-import { Readable } from 'stream';
+import stream from 'stream';
 
 import allmisc from './miscellaneous/allmisc';
 import Stats from './middlewares/stats/allStats'
-import {assignTargetServerStatus} from './middlewares/stats/targetServerStatus'
+import TargetServerStatus from './middlewares/stats/targetServerStatus'
 import ComputerUsage from './middlewares/stats/computingPowerUsage'
 import initialize from './config/initialize';
 import {settingsData} from './config/initialize'
@@ -17,9 +17,9 @@ import NeutralizeIP from './middlewares/IpModule/ipNeutralization'
 import OriginFiltering from './middlewares/IpModule/ipBasedFiltering'
 
 //middlewares
-import {requestRateCounter, refreshCounterAndUpdateRate} from './middlewares/stats/requestRateCounter'
-import { handleIncomingCookie, handleOutGoingCookie } from './middlewares/cookieEncryption/cookieEncrypt';
-import { limitRateTo } from './middlewares/ratelimiting/ratelimiting'
+import RequestRateModule from './middlewares/stats/requestRateCounter'
+import CookieHandlers from './middlewares/cookieEncryption/cookieEncrypt';
+import RateLimiter from './middlewares/ratelimiting/ratelimiting'
 
 //config settings
 initialize.initializeSettings(0, mainFunction)
@@ -39,6 +39,8 @@ app.use(express.urlencoded({extended : false}));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+const controller = new AbortController()
+
 //====layer 1 : Reject requests if NetBreaker is offline (runningStatus=0)
 app.use(ServiceStatusManager.handleServiceStatus())
 
@@ -47,7 +49,7 @@ app.use(NeutralizeIP.neutralizeIPv4AndIPv6)       //Adds req.normalIP, IP addres
 app.use(OriginFiltering.filterOrigin(settingsData.inspectOriginMode))
 
 //====layer 3 : rate-limiting
-app.use(limitRateTo(settingsData.maxRequestRateLimit))
+app.use(RateLimiter.limitRateTo(settingsData.maxRequestRateLimit))
 
 //====layer 4 : memory limiting/load queuer
 
@@ -60,8 +62,8 @@ app.use(ServiceStatusManager.handleTargetServiceStatus())
 app.disable("x-powered-by");
 
 //====layer 7 : Stats
-app.use(requestRateCounter)
-refreshCounterAndUpdateRate()   //to initiate the request counter
+app.use(RequestRateModule.requestRateCounter)
+RequestRateModule.refreshCounterAndUpdateRate()   //to initiate the request counter
 
 //Log Stats
 Stats.LogStats(1000)                     //for development phase and testing
@@ -70,7 +72,7 @@ Stats.LogStats(1000)                     //for development phase and testing
 ComputerUsage.memoryUsageMonitor()
 
 //====layer 8 : cookiehandlers
-app.use(handleIncomingCookie(settingsData.cipherkey, settingsData.cookieEncryption))
+app.use(CookieHandlers.handleIncomingCookie(settingsData.cipherkey, settingsData.cookieEncryption))
 
 //final response when every security layer is passed
 app.use(async (req, res, next) => {
@@ -78,13 +80,14 @@ app.use(async (req, res, next) => {
         method: (req.method).toString(),
         headers: req.headers as HeadersInit,
         body: req.body? JSON.stringify(req.body): null,
+        signal: controller.signal
     }).then((response: any)=>{
         if(response.ok || response.status == "304"){
             settingsData.currentServerStatus=1
-            assignTargetServerStatus(settingsData.currentServerStatus)
+            TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
         }else{
             settingsData.currentServerStatus=0
-            assignTargetServerStatus(settingsData.currentServerStatus)
+            TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
         }
 
         response.headers.forEach((value: string, key: string) => {
@@ -104,19 +107,20 @@ app.use(async (req, res, next) => {
             }
         })
 
-        res.setHeader("Set-Cookie", handleOutGoingCookie(response, settingsData.cipherkey, settingsData.cookieEncryption));
+        res.setHeader("Set-Cookie", CookieHandlers.handleOutGoingCookie(response, settingsData.cipherkey, settingsData.cookieEncryption));
 
         res.status(response.status)
         if (!response.body){
             return res.end()
         }
 
-        const stream = Readable.fromWeb(response.body as any)
-        stream.pipe(res)
+        const mainStream = stream.Readable.fromWeb(response.body as any)
+        mainStream.pipe(res)
         next()
     }).catch((err)=>{
+        console.log(err)
         settingsData.currentServerStatus=0
-        assignTargetServerStatus(settingsData.currentServerStatus)
+        TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
     })
 });
 

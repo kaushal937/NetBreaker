@@ -17,4 +17,5 @@ function requestRateCounter(req: any, res: any, next: any){
     next()
 }
 
-export {requestRateCounter, refreshCounterAndUpdateRate, rate}
+export default {requestRateCounter, refreshCounterAndUpdateRate, rate}
+export {rate}

@@ -1,10 +1,10 @@
-import { encryptCookie, decryptCookie, returnOutgoingCookiesAsNoChange } from "../../cookieEncryption/cookieEncryptionFunctions";
+import CookieEncryptionModule from "../../cookieEncryption/cookieEncryptionFunctions";
 
 function handleIncomingCookie(cipherKey: string, encryptOrNot: number){
     //decryption
     return (req: any, res: any, next: any)=>{
         if(encryptOrNot == 1){
-            req.cookies = decryptCookie(req.cookies, cipherKey)
+            req.cookies = CookieEncryptionModule.decryptCookie(req.cookies, cipherKey)
         }
         next()
     }
@@ -13,13 +13,13 @@ function handleIncomingCookie(cipherKey: string, encryptOrNot: number){
 function handleOutGoingCookie(response: any, cipherKey: string, encryptOrNot: number){
     //encryption
     if(encryptOrNot == 1){
-        return encryptCookie(response, cipherKey)
+        return CookieEncryptionModule.encryptCookie(response, cipherKey)
     }else{
-        return returnOutgoingCookiesAsNoChange(response)
+        return CookieEncryptionModule.returnOutgoingCookiesAsNoChange(response)
     }
 }
 
-export {
+export default{
     handleIncomingCookie,
     handleOutGoingCookie
 }

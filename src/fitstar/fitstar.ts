@@ -3,7 +3,7 @@ import * as crypto from 'node:crypto';
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
 
-export function fitstar(text: string, encryptionKey: string): string {
+function fitstarLock(text: string, encryptionKey: string): string {
     try{
         const ENCRYPTION_KEY: Buffer = Buffer.from(encryptionKey); 
         const iv: Buffer = crypto.randomBytes(IV_LENGTH);
@@ -25,7 +25,7 @@ export function fitstar(text: string, encryptionKey: string): string {
     }
 }
 
-export function fitstarUnlock(encryptedPayload: string, encryptionKey: string): string {
+function fitstarUnlock(encryptedPayload: string, encryptionKey: string): string {
     try{
         const ENCRYPTION_KEY: Buffer = Buffer.from(encryptionKey); 
 
@@ -55,4 +55,9 @@ export function fitstarUnlock(encryptedPayload: string, encryptionKey: string): 
     }catch(e){
         return encryptedPayload;
     }
+}
+
+export default{
+    fitstarLock,
+    fitstarUnlock
 }

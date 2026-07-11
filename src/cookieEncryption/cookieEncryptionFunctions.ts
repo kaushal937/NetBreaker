@@ -1,4 +1,4 @@
-import { fitstar, fitstarUnlock } from "../fitstar/fitstar";
+import Fitstar from "../fitstar/fitstar";
 import setCookieParser from 'set-cookie-parser';
 import * as cookie from 'cookie';
 
@@ -6,7 +6,7 @@ function encryptCookie(response: any, cipherKey: string){
     const modifiedSetCookieHeader = response.headers.getSetCookie().map((header: any) => {
             const parsed = setCookieParser.parseSetCookie(header)[0];
 
-            parsed.value = fitstar(parsed.value, cipherKey)
+            parsed.value = Fitstar.fitstarLock(parsed.value, cipherKey)
 
             return cookie.serialize(parsed.name, parsed.value, {
                 path: parsed.path,
@@ -40,13 +40,13 @@ function returnOutgoingCookiesAsNoChange(response: any){
 
 function decryptCookie(cookie: any, cipherKey: string){
     Object.entries(cookie).forEach(([key, value]) => {
-        cookie[key] = fitstarUnlock(cookie[key], cipherKey)
+        cookie[key] = Fitstar.fitstarUnlock(cookie[key], cipherKey)
     });
 
     return cookie
 }
 
-export {
+export default{
     encryptCookie,
     decryptCookie,
     returnOutgoingCookiesAsNoChange
