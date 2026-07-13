@@ -76,6 +76,12 @@ app.use(CookieHandlers.handleIncomingCookie(settingsData.cipherkey, settingsData
 
 //final response when every security layer is passed
 app.use(async (req, res, next) => {
+//     res.on('close', () => {
+//   if (!res.writableEnded) {
+//     controller.abort();
+//   }
+// });
+
     await fetch(settingsData.targetURL+req.path, {
         method: (req.method).toString(),
         headers: req.headers as HeadersInit,
@@ -118,7 +124,7 @@ app.use(async (req, res, next) => {
         mainStream.pipe(res)
         next()
     }).catch((err)=>{
-        console.log(err)
+        console.log(err, "hi")
         settingsData.currentServerStatus=0
         TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
     })
