@@ -1,4 +1,5 @@
 import {rate} from './requestRateCounter'
+import RequestRateModule from './requestRateCounter'
 import {targetServerStatus} from './targetServerStatus'
 import ComputerUsage from './computingPowerUsage'
 import allmisc from '../../miscellaneous/allmisc'

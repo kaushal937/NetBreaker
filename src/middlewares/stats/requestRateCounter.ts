@@ -1,6 +1,6 @@
 import allmisc from '../../miscellaneous/allmisc';
 
-var refreshTime = 500    //in milliseconds
+var refreshTime = 1000    //in milliseconds
 let rate = 0             //in requests per second
 let requestCount = 0;
 
@@ -13,7 +13,7 @@ async function refreshCounterAndUpdateRate(){
 }
 
 function requestRateCounter(req: any, res: any, next: any){
-    requestCount = requestCount + 1
+    requestCount++
     next()
 }
 
