@@ -52,7 +52,7 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
         }
     }
     try{
-        getsetting("target", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+        getsetting("proxiedtarget", (err: NodeJS.ErrnoException | null, data: string | null)=>{
             if(err){
                 console.log(err)
                 return
@@ -93,7 +93,7 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
 
-        getsetting("target", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+        getsetting("proxiedtarget", (err: NodeJS.ErrnoException | null, data: string | null)=>{
             if(err){
                 console.log(err)
                 return
