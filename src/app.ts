@@ -124,7 +124,6 @@ app.use(async (req, res, next) => {
         mainStream.pipe(res)
         next()
     }).catch((err)=>{
-        console.log(err, "hi")
         settingsData.currentServerStatus=0
         TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
     })

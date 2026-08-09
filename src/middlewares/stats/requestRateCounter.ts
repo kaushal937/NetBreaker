@@ -1,6 +1,6 @@
 import allmisc from '../../miscellaneous/allmisc';
 
-var refreshTime = 1000    //in milliseconds
+var refreshTime = 1000   //in milliseconds
 let rate = 0             //in requests per second
 let requestCount = 0;
 
