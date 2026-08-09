@@ -20,6 +20,7 @@ import OriginFiltering from './middlewares/IpModule/ipBasedFiltering'
 import RequestRateModule from './middlewares/stats/requestRateCounter'
 import CookieHandlers from './middlewares/cookieEncryption/cookieEncrypt';
 import RateLimiter from './middlewares/ratelimiting/ratelimiting'
+import AdminIdentifier from './middlewares/adminMiddleware/identifyAdmin'
 
 //config settings
 initialize.initializeSettings(0, mainFunction)
@@ -40,6 +41,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 const controller = new AbortController()
+
+//
+app.use(AdminIdentifier.identifyAdmin(1, "/3f8"))
 
 //====layer 1 : Reject requests if NetBreaker is offline (runningStatus=0)
 app.use(ServiceStatusManager.handleServiceStatus())
