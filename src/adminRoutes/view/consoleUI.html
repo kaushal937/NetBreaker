@@ -305,6 +305,33 @@ function execute(command) {
     return;
   }
 
+   if (command.split(" ")[0] == "admin") {
+    let route = "/"
+    let method = "POST"
+    headers = {
+        "Content-Type" : "application/json",
+        "x-admin" : "true"
+    }
+    let payload = {}
+
+    fetch(route, {
+        method,
+        headers,
+        body : JSON.stringify(payload)
+    }).then((response)=>{
+        return response.json(), response.status
+    }).then((answer, answerStatus)=>{
+        addLine(`Response Status : `+answerStatus)
+        if(answerStatus > 199 && answerStatus < 300){
+            addLine(answer.msg)
+        }
+        
+    })
+
+    input.focus();
+    return;
+  }
+
   // Everything else
   addLine(
     `${escapeHTML(command)}: command not found`,
