@@ -14,13 +14,15 @@ let settingsData:settings = {
     cipherkey : "",
     cookieEncryption : 1,
     maxRequestRateLimit : 5000,
-    inspectOriginMode: "wl"
+    inspectOriginMode: "wl",
+    adminMode : 1,
+    adminDefinedPath : "/"
 }
 
 let ipBlackList: string[]
 let ipWhiteList: string[]
 
-let settingsChecklistRequirement: number = 9
+let settingsChecklistRequirement: number = 11
 let settingsChecklist: number = 0
 
 function waitstatus(){
@@ -130,6 +132,26 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
                 return
             }else{
                 settingsData.inspectOriginMode = data?? "wl"
+                settingsChecklist++;
+                gonext()
+            }
+        })
+        getsetting("adminMode", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+            if(err){
+                console.log(err)
+                return
+            }else{
+                settingsData.adminMode = parseInt(data?? "1") 
+                settingsChecklist++;
+                gonext()
+            }
+        })
+        getsetting("adminDefinedPath", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+            if(err){
+                console.log(err)
+                return
+            }else{
+                settingsData.adminDefinedPath = data?? "/" 
                 settingsChecklist++;
                 gonext()
             }

@@ -8,7 +8,7 @@ function identifyAdmin(enable: number, adminPath: string){
                 IPMap.set((req.ip+"").toString(), (0).toString())
             }else{
                 if(IPMap.has((req.ip+"").toString())){
-                    if(parseInt(IPMap.get((req.ip+"RegisteredTimestamp").toString()+"").toString())-Date.now() < 4900){
+                    if((Date.now() - parseInt(IPMap.get((req.ip+"RegisteredTimestamp").toString()+"").toString())) < 4900){
                         IPMap.set((req.ip+"").toString(), (parseInt(IPMap.get((req.ip).toString()+"").toString())+1).toString())
                         IPMap.set((req.ip+"RegisteredTimestamp").toString(), Date.now().toString())
                         next()

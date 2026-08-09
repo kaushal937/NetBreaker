@@ -43,7 +43,7 @@ app.set('views', path.join(__dirname, 'views'));
 const controller = new AbortController()
 
 //
-app.use(AdminIdentifier.identifyAdmin(1, "/3f8"))
+app.use(AdminIdentifier.identifyAdmin(settingsData.adminMode, settingsData.adminDefinedPath))
 
 //====layer 1 : Reject requests if NetBreaker is offline (runningStatus=0)
 app.use(ServiceStatusManager.handleServiceStatus())

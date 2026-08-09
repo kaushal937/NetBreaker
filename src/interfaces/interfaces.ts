@@ -9,6 +9,8 @@ interface settings{
     cookieEncryption : number;
     maxRequestRateLimit : number;
     inspectOriginMode : string;
+    adminMode : number;
+    adminDefinedPath : string;
 }
 
 interface memoryUsageStats{
