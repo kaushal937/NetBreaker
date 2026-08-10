@@ -152,3 +152,4 @@ app.listen(settingsData.port, () => {
 
 //when an ip is added to whitelist by admin panel, update the ipwhitelist.nb file at that moment only
 //add a lightweight standbymode when NetBreaker is off, ie status=0 or currentServerStatus=0, which responds as res.end()
+
