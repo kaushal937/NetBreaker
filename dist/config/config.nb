@@ -7,3 +7,5 @@ maxRequestRateLimit=200
 inspectOriginMode=blacklist
 adminMode=1
 adminDefinedPath=/
+adminDefinedPathRequiredReloadCount=5
+adminDefinedPathReloadTimeWindow=5000

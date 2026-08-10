@@ -11,6 +11,8 @@ interface settings{
     inspectOriginMode : string;
     adminMode : number;
     adminDefinedPath : string;
+    adminRequiredReloadCount : number;
+    adminReloadTimeWindow : number;
 }
 
 interface memoryUsageStats{

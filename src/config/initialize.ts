@@ -16,13 +16,15 @@ let settingsData:settings = {
     maxRequestRateLimit : 5000,
     inspectOriginMode: "wl",
     adminMode : 1,
-    adminDefinedPath : "/"
+    adminDefinedPath : "/",
+    adminRequiredReloadCount : 5,
+    adminReloadTimeWindow : 5000
 }
 
 let ipBlackList: string[]
 let ipWhiteList: string[]
 
-let settingsChecklistRequirement: number = 11
+let settingsChecklistRequirement: number = 13
 let settingsChecklist: number = 0
 
 function waitstatus(){
@@ -152,6 +154,26 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
                 return
             }else{
                 settingsData.adminDefinedPath = data?? "/" 
+                settingsChecklist++;
+                gonext()
+            }
+        })
+        getsetting("adminDefinedPathRequiredReloadCount", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+            if(err){
+                console.log(err)
+                return
+            }else{
+                settingsData.adminRequiredReloadCount = parseInt(data?? "5")
+                settingsChecklist++;
+                gonext()
+            }
+        })
+        getsetting("adminDefinedPathReloadTimeWindow", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+            if(err){
+                console.log(err)
+                return
+            }else{
+                settingsData.adminReloadTimeWindow = parseInt(data?? "5000" )
                 settingsChecklist++;
                 gonext()
             }

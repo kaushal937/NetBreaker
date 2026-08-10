@@ -42,30 +42,30 @@ app.set('views', path.join(__dirname, 'views'));
 
 const controller = new AbortController()
 
-//
-app.use(AdminIdentifier.identifyAdmin(settingsData.adminMode, settingsData.adminDefinedPath))
+//====layer 1 : Handle Admin Instructions
+app.use(AdminIdentifier.identifyAdmin(settingsData.adminMode, settingsData.adminDefinedPath, settingsData.adminRequiredReloadCount, settingsData.adminReloadTimeWindow))
 
-//====layer 1 : Reject requests if NetBreaker is offline (runningStatus=0)
+//====layer 2 : Reject requests if NetBreaker is offline (runningStatus=0)
 app.use(ServiceStatusManager.handleServiceStatus())
 
-//====layer 2 : Ip Normalization & Origin Inspecter
+//====layer 3 : Ip Normalization & Origin Inspecter
 app.use(NeutralizeIP.neutralizeIPv4AndIPv6)       //Adds req.normalIP, IP address regardless of IPv4 or IPv6
 app.use(OriginFiltering.filterOrigin(settingsData.inspectOriginMode))
 
-//====layer 3 : rate-limiting
+//====layer 4 : rate-limiting
 app.use(RateLimiter.limitRateTo(settingsData.maxRequestRateLimit))
 
-//====layer 4 : memory limiting/load queuer
+//====layer 5 : memory limiting/load queuer
 
 
-//====layer 5: catches if the server is offline
+//====layer 6: catches if the server is offline
 ServerStatusModule.checkTargetServerStatus()
 app.use(ServiceStatusManager.handleTargetServiceStatus())
 
-//====layer 6 : remove unnecessary headers
+//====layer 7 : remove unnecessary headers
 app.disable("x-powered-by");
 
-//====layer 7 : Stats
+//====layer 8 : Stats
 app.use(RequestRateModule.requestRateCounter)
 RequestRateModule.refreshCounterAndUpdateRate()   //to initiate the request counter
 
@@ -75,7 +75,7 @@ Stats.LogStats(1000)                     //for development phase and testing
 // memory-usage-updater
 ComputerUsage.memoryUsageMonitor()
 
-//====layer 8 : cookiehandlers
+//====layer 9 : cookiehandlers
 app.use(CookieHandlers.handleIncomingCookie(settingsData.cipherkey, settingsData.cookieEncryption))
 
 //final response when every security layer is passed
