@@ -306,7 +306,7 @@ function execute(command) {
   }
 
    if (command.split(" ")[0] == "admin") {
-    let route = "/"
+    let route = "/3f8"
     let method = "POST"
     headers = {
         "Content-Type" : "application/json",
@@ -319,10 +319,11 @@ function execute(command) {
         headers,
         body : JSON.stringify(payload)
     }).then((response)=>{
-        return response.json(), response.status
-    }).then((answer, answerStatus)=>{
-        addLine(`Response Status : `+answerStatus)
-        if(answerStatus > 199 && answerStatus < 300){
+      addLine(`Response Status : `+response.status)
+        return response.json()
+    }).then((answer)=>{
+        console.log(answer)
+        if(answer){
             addLine(answer.msg)
         }
     })

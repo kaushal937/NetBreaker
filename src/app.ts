@@ -21,6 +21,7 @@ import RequestRateModule from './middlewares/stats/requestRateCounter'
 import CookieHandlers from './middlewares/cookieEncryption/cookieEncrypt';
 import RateLimiter from './middlewares/ratelimiting/ratelimiting'
 import AdminIdentifier from './middlewares/adminMiddleware/identifyAdmin'
+import ProcessXAdminHeader from './middlewares/adminMiddleware/processX-AdminHeader'
 
 //config settings
 initialize.initializeSettings(0, mainFunction)
@@ -44,6 +45,7 @@ const controller = new AbortController()
 
 //====layer 1 : Handle Admin Instructions
 app.use(AdminIdentifier.identifyAdmin(settingsData.adminMode, settingsData.adminDefinedPath, settingsData.adminRequiredReloadCount, settingsData.adminReloadTimeWindow))
+app.use(ProcessXAdminHeader.processXAdminHeader(settingsData.adminDefinedPath, "34f3r"))
 
 //====layer 2 : Reject requests if NetBreaker is offline (runningStatus=0)
 app.use(ServiceStatusManager.handleServiceStatus())

@@ -6,6 +6,6 @@ cookieEncryptOption=1
 maxRequestRateLimit=200
 inspectOriginMode=blacklist
 adminMode=1
-adminDefinedPath=/
+adminDefinedPath=/3f8
 adminDefinedPathRequiredReloadCount=5
 adminDefinedPathReloadTimeWindow=5000
