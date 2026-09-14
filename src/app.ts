@@ -62,7 +62,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x
 app.use(express.urlencoded({extended : false}));
 
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.resolve(process.cwd(), '../views'));
 
 const controller = new AbortController()
 
@@ -105,6 +105,9 @@ app.use(CookieHandlers.handleIncomingCookie(settingsData.cipherkey, settingsData
 
 //final response when every security layer is passed
 app.use(async (req, res, next) => {
+    if(!DNSmodule.checkDomainInventory(req.hostname)){
+        res.render("renderError", {errno:-105, msg:"Failed to lookup for hostname - "+req.hostname})
+    }
     await fetch("http://127.0.0.1:"+DNSmodule.smartDnsLookup(req.hostname)+req.path, {
         method: (req.method).toString(),
         headers: req.headers as HeadersInit,

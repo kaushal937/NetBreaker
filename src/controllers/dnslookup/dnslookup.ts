@@ -7,6 +7,11 @@ function smartDnsLookup(domainName: string){
         return [-105]
     }
 }
+function checkDomainInventory(domainName: string){
+    if(domainInventory.includes(domainName)){return true}else{return false}
+}
+
 export default {
-    smartDnsLookup
+    smartDnsLookup,
+    checkDomainInventory
 }
