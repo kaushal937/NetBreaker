@@ -1,4 +1,6 @@
 import express from 'express';
+import https from 'https';
+import fs from 'node:fs';
 import path from 'path';
 import bodyParser from 'body-parser';
 import cookieparser from 'cookie-parser';
@@ -10,11 +12,13 @@ import TargetServerStatus from './middlewares/stats/targetServerStatus'
 import ComputerUsage from './middlewares/stats/computingPowerUsage'
 import initialize from './config/initialize';
 import {settingsData} from './config/initialize'
-import ServerStatusModule from './controllers/serverStatus/serverStatus'
+// import ServerStatusModule from './controllers/serverStatus/serverStatus'
 import ServiceStatusManager from './middlewares/serverStatusMoniterManager/serverStatusManager'
 import LogOnStart from './controllers/logOnStart/logOnStart'
 import NeutralizeIP from './middlewares/IpModule/ipNeutralization'
 import OriginFiltering from './middlewares/IpModule/ipBasedFiltering'
+import {sslOptions} from './interfaces/interfaces';
+import DNSmodule from './controllers/dnslookup/dnslookup';
 
 //middlewares
 import RequestRateModule from './middlewares/stats/requestRateCounter'
@@ -28,11 +32,30 @@ initialize.initializeSettings(0, mainFunction)
 
 //main function of the module; runs only when everythings alright, configs are loaded and other checklists are completed
 async function mainFunction(){
-
 //mainfunction start
 
 const app = express();
 app.use(cookieparser());
+
+let sslOptions: sslOptions = {
+    key: Buffer.alloc(1),
+    cert: Buffer.alloc(1)
+}
+
+if(settingsData.protocol == "https"){
+    try{
+        sslOptions = {
+            key: fs.readFileSync(settingsData.sslKeyPath),
+            cert: fs.readFileSync(settingsData.sslCertPath)
+        }
+        startOnHTTPS()
+    }catch(e){
+        console.log("FATAL! SSL key or certificate could not be found, therefore running on http")
+        startOnHTTP()
+    }
+}else{
+    startOnHTTP()
+}
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
@@ -61,8 +84,8 @@ app.use(RateLimiter.limitRateTo(settingsData.maxRequestRateLimit))
 
 
 //====layer 6: catches if the server is offline
-ServerStatusModule.checkTargetServerStatus()
-app.use(ServiceStatusManager.handleTargetServiceStatus())
+// ServerStatusModule.checkTargetServerStatus()
+// app.use(ServiceStatusManager.handleTargetServiceStatus())
 
 //====layer 7 : remove unnecessary headers
 app.disable("x-powered-by");
@@ -82,25 +105,19 @@ app.use(CookieHandlers.handleIncomingCookie(settingsData.cipherkey, settingsData
 
 //final response when every security layer is passed
 app.use(async (req, res, next) => {
-//     res.on('close', () => {
-//   if (!res.writableEnded) {
-//     controller.abort();
-//   }
-// });
-
-    await fetch(settingsData.targetURL+req.path, {
+    await fetch("http://127.0.0.1:"+DNSmodule.smartDnsLookup(req.hostname)+req.path, {
         method: (req.method).toString(),
         headers: req.headers as HeadersInit,
         body: req.body? JSON.stringify(req.body): null,
         signal: controller.signal
     }).then((response: any)=>{
-        if(response.ok || response.status == "304"){
-            settingsData.currentServerStatus=1
-            TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
-        }else{
-            settingsData.currentServerStatus=0
-            TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
-        }
+        // if(response.ok || response.status == "304"){
+        //     settingsData.currentServerStatus=1
+        //     TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
+        // }else{
+        //     settingsData.currentServerStatus=0
+        //     TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
+        // }
 
         response.headers.forEach((value: string, key: string) => {
             const lowerkey = key.toLowerCase()
@@ -131,14 +148,22 @@ app.use(async (req, res, next) => {
         next()
     }).catch((err)=>{
         settingsData.currentServerStatus=0
-        TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
+        // TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
     })
 });
 
-
-app.listen(settingsData.port, () => {
-    LogOnStart.logOnStart()
-})
+function startOnHTTP(){
+    app.listen(settingsData.port, () => {
+        LogOnStart.logOnStart()
+    })
+}
+function startOnHTTPS(){
+    const secureServer = https.createServer(sslOptions, app)
+    secureServer.listen(settingsData.port, () => {
+        LogOnStart.logOnStart()
+        console.log("Listening on https")
+    })
+}
 
 //mainfunction end
 }

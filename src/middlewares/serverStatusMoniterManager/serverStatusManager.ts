@@ -1,5 +1,5 @@
 import {settingsData} from '../../config/initialize'
-import ServerStatusModule from '../../controllers/serverStatus/serverStatus'
+// import ServerStatusModule from '../../controllers/serverStatus/serverStatus'
 
 function handleServiceStatus(){
     return (req: any, res: any, next: any)=>{
@@ -17,7 +17,7 @@ function handleTargetServiceStatus(){
             next()
         }else{
             res.render("renderError", {errno:400, msg:"Server is currently unavailable"})
-            ServerStatusModule.checkTargetServerStatus()
+            // ServerStatusModule.checkTargetServerStatus()
             // res.render("renderError", {errno:400, msg:"internal server error(s)"})
         }
     }

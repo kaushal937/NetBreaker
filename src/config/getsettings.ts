@@ -26,7 +26,7 @@ function sumMultipleLength(inp: any){
 async function getsetting(name:string, cb:(err: NodeJS.ErrnoException | null, data: string | null) => void){
     if(varlist.length == 0){
         //settings are not initialized
-        fs.readFile(path.join(__dirname, "./config.nb"), "utf-8", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+        fs.readFile(path.resolve(process.cwd(), '../nbconfig/config.nb'), "utf-8", (err: NodeJS.ErrnoException | null, data: string | null)=>{
             if(data){
                 let val = data.split(/\r\n|\n/)
 

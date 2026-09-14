@@ -1,16 +1,15 @@
 import {settings} from '../interfaces/interfaces';
 import allmisc from '../miscellaneous/allmisc';
 import {getsetting} from "./getsettings";
+import IPMapping from "./getMapping";
 import os from 'os'
 import ipListReaders from '../controllers/ipListModule/ipListParser'
 
 let settingsData:settings = {
-    target : 0,
     port : 0,
     runningStatus : 0,
-    currentServerStatus : 0,
+    currentServerStatus : 1,
     hostOS: "string",
-    targetURL : "string",
     cipherkey : "",
     cookieEncryption : 1,
     maxRequestRateLimit : 5000,
@@ -18,13 +17,19 @@ let settingsData:settings = {
     adminMode : 1,
     adminDefinedPath : "/",
     adminRequiredReloadCount : 5,
-    adminReloadTimeWindow : 5000
+    adminReloadTimeWindow : 5000,
+    protocol : "http",
+    sslKeyPath : "/etc",
+    sslCertPath : "/etc"
 }
 
 let ipBlackList: string[]
 let ipWhiteList: string[]
 
-let settingsChecklistRequirement: number = 13
+let domainInventory: string[]
+let dnsZone: Map<string, number[]>
+
+let settingsChecklistRequirement: number = 14
 let settingsChecklist: number = 0
 
 function waitstatus(){
@@ -36,7 +41,6 @@ function waitstatus(){
 }
 
 async function confirmSets(waitTime: number, mainCallBack: any){
-    //console settings to confirm
     console.log(settingsData)
     console.log(allmisc.breakline())
     console.log("is this OK? If not, press Ctrl+C")
@@ -56,16 +60,6 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
         }
     }
     try{
-        getsetting("proxiedtarget", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
-            }else{
-                settingsData.target = parseInt(data ?? "3000")
-                settingsChecklist++;
-                gonext()
-            }
-        })
         getsetting("port", (err: NodeJS.ErrnoException | null, data: string | null)=>{
             if(err){
                 console.log(err)
@@ -96,17 +90,6 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
                 gonext()
             }
         })
-
-        getsetting("proxiedtarget", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
-            }else{
-                settingsData.targetURL = ("http://localhost:"+parseInt(data ?? "0"))
-                settingsChecklist++;
-                gonext()
-            }
-        })
         getsetting("cookieEncryptOption", (err: NodeJS.ErrnoException | null, data: string | null)=>{
             if(err){
                 console.log(err)
@@ -124,6 +107,36 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
                 return
             }else{
                 settingsData.maxRequestRateLimit = parseInt(data ?? "5000")
+                settingsChecklist++;
+                gonext()
+            }
+        })
+        getsetting("protocol", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+            if(err){
+                console.log(err)
+                return
+            }else{
+                settingsData.protocol = data?.toString() || "http"
+                settingsChecklist++;
+                gonext()
+            }
+        })
+        getsetting("sslKeyPath", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+            if(err){
+                console.log(err)
+                return
+            }else{
+                settingsData.sslKeyPath = data?.toString() || "/etc"
+                settingsChecklist++;
+                gonext()
+            }
+        })
+        getsetting("sslCertPath", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+            if(err){
+                console.log(err)
+                return
+            }else{
+                settingsData.sslCertPath = data?.toString() || "/etc"
                 settingsChecklist++;
                 gonext()
             }
@@ -196,10 +209,17 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             ipBlackList = ["error"]
             ipWhiteList = ["error"]
         }
+        try{
+            domainInventory = IPMapping.DomainInventory()
+            dnsZone = IPMapping.DNSZone()
+        }catch(e){
+            domainInventory = ['error']
+            dnsZone = new Map().set("error", [-1])
+        }
     }catch(e){
         return 0
     }
 }
 
 export default { initializeSettings }
-export { settingsData, ipBlackList, ipWhiteList }
+export { settingsData, ipBlackList, ipWhiteList, domainInventory, dnsZone}

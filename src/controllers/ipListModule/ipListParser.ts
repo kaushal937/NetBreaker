@@ -1,7 +1,8 @@
 import fileReader from '../lineReader/lineReader'
+import path from 'path'
 
 function readWhiteList(cb: any){
-    fileReader.readFileAsArray('./src/ipLists/ipWhitelist.txt', (dataArray: string[])=>{
+    fileReader.readFileAsArray(path.resolve(process.cwd(), '../nbconfig/ipWhitelist.txt'), (dataArray: string[])=>{
         cb(dataArray)
     })
 }
@@ -10,7 +11,7 @@ function readWhiteList(cb: any){
 // }
 
 function readBlackList(cb: any){
-    fileReader.readFileAsArray('./src/ipLists/ipBlacklist.txt', (dataArray: string[])=>{
+    fileReader.readFileAsArray(path.resolve(process.cwd(), '../config/ipBlackList.txt') , (dataArray: string[])=>{
         cb(dataArray)
     })
 }
