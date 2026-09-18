@@ -1,6 +1,5 @@
 import AssignedPortFetcher from '../../controllers/serverStatus/assignedLoadFetcher'
 import ProxyStatusAssigner from '../../controllers/serverStatus/statusAssigner'
-import DNSModule from '../../controllers/dnslookup/dnslookup'
 
 function checkTargetServerStatus(){
     return (req: any, res: any, next: any)=>{
@@ -9,18 +8,15 @@ function checkTargetServerStatus(){
         .then(response => {
             if(response.ok){
                 ProxyStatusAssigner.assignStatus(req.hostname, fetchPort, 1)
-                console.log("jo")
                 next()
             }else{
                 ProxyStatusAssigner.assignStatus(req.hostname, fetchPort, 0)
-                console.log("joi1")
-                res.render("renderError", {errno: 500, msg: "Internal Server Error - Server is offline. Reload or wait."})
+                res.render("renderError", {errno: 500, msg: "Internal Server Error - Server is offline. Try again later."})
             }
         })
         .catch(error => {
-            
             ProxyStatusAssigner.assignStatus(req.hostname, fetchPort, 0);
-            res.render("renderError", {errno: 500, msg: "Internal Server Error - Server is offline. Reload or wait."});
+            res.render("renderError", {errno: 500, msg: "Internal Server Error - Server is offline. Try again later."});
         })
     }
 }

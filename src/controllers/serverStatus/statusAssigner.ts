@@ -14,7 +14,6 @@ function assignStatus(hostname: string, portNumber: number, value: number){
         }
     }
     statusMapping[dnsHostnameDataIndex].StatusData[indexInPortArray].status = value
-    console.log(statusMapping[dnsHostnameDataIndex].StatusData[indexInPortArray].status)
     // shiftBalance()
 }
 

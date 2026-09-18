@@ -1,5 +1,10 @@
-import { name } from "ejs";
-import { hostname } from "node:os";
+declare global {
+  namespace Express {
+    interface Request {
+      normalIP?: string;
+    }
+  }
+}
 
 interface settings{
     port : number;

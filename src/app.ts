@@ -99,7 +99,7 @@ async function mainFunction() {
 
   //====layer 6: catches if the server is offline
   app.use(ServerStatusModule.checkTargetServerStatus())
-  app.use(ServiceStatusManager.handleTargetServiceStatus())
+  // app.use(ServiceStatusManager.handleTargetServiceStatus())
 
   //====layer 7 : remove unnecessary headers
   app.disable("x-powered-by");
@@ -134,7 +134,7 @@ async function mainFunction() {
       });
     }
     await fetch(
-      "http://127.0.0.1:" + DNSmodule.smartDnsLookup(req.hostname) + req.path,
+      "http://127.0.0.1:" + DNSmodule.smartDnsLookup(req.hostname, req.normalIP?? "") + req.path,
       {
         method: req.method.toString(),
         headers: req.headers as HeadersInit,

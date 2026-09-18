@@ -1,8 +1,9 @@
 import { domainInventory, dnsZone } from "../../config/initialize";
+import LoadFetcher from "../serverStatus/assignedLoadFetcher";
 
-function smartDnsLookup(domainName: string){
+function smartDnsLookup(domainName: string, reqIP: string){
     if(domainInventory.includes(domainName)){
-        return dnsZone.get(domainName) ?? [80]
+        return LoadFetcher.assignedPort(domainName, reqIP)
     }else{
         return [-105]
     }

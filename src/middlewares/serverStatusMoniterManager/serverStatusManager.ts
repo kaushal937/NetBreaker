@@ -3,7 +3,11 @@ import {settingsData} from '../../config/initialize'
 
 function handleServiceStatus(){
     return (req: any, res: any, next: any)=>{
-        next()
+        if(settingsData.runningStatus == 1){
+            next()
+        }else{
+            res.render("renderError", {errno: 500, msg: "NetBreaker is offline"})
+        }
     }
 }
 
