@@ -1,7 +1,7 @@
-import Misc from '../../miscellaneous/allmisc'
+import IPNeutralizer from '../../controllers/IPNeutralizer/IPNeutralizer'
 
 function neutralizeIPv4AndIPv6(req: any, res: any, next: any){
-    req.normalIP = Misc.neutralizeIP(req.ip)
+    req.normalIP = IPNeutralizer.neutralizeIP(req.ip)
     next()
 }
 

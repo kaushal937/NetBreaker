@@ -1,119 +1,148 @@
-import express from 'express';
-import https from 'https';
-import fs from 'node:fs';
-import path from 'path';
-import bodyParser from 'body-parser';
-import cookieparser from 'cookie-parser';
-import stream from 'stream';
+import express from "express";
+import https from "https";
+import fs from "node:fs";
+import path from "path";
+import bodyParser from "body-parser";
+import cookieparser from "cookie-parser";
+import stream from "stream";
 
-import allmisc from './miscellaneous/allmisc';
-import Stats from './middlewares/stats/allStats'
-import TargetServerStatus from './middlewares/stats/targetServerStatus'
-import ComputerUsage from './middlewares/stats/computingPowerUsage'
-import initialize from './config/initialize';
-import {settingsData} from './config/initialize'
+import allmisc from "./miscellaneous/allmisc";
+import Stats from "./middlewares/stats/allStats";
+import TargetServerStatus from "./middlewares/stats/targetServerStatus";
+import ComputerUsage from "./middlewares/stats/computingPowerUsage";
+import initialize from "./config/initialize";
+import { settingsData } from "./config/initialize";
 // import ServerStatusModule from './controllers/serverStatus/serverStatus'
-import ServiceStatusManager from './middlewares/serverStatusMoniterManager/serverStatusManager'
-import LogOnStart from './controllers/logOnStart/logOnStart'
-import NeutralizeIP from './middlewares/IpModule/ipNeutralization'
-import OriginFiltering from './middlewares/IpModule/ipBasedFiltering'
-import {sslOptions} from './interfaces/interfaces';
-import DNSmodule from './controllers/dnslookup/dnslookup';
+import ServiceStatusManager from "./middlewares/serverStatusMoniterManager/serverStatusManager";
+import LogOnStart from "./controllers/logOnStart/logOnStart";
+import NeutralizeIP from "./middlewares/IpModule/ipNeutralization";
+import OriginFiltering from "./middlewares/IpModule/ipBasedFiltering";
+import { sslOptions } from "./interfaces/interfaces";
+import DNSmodule from "./controllers/dnslookup/dnslookup";
+import XForwarderFor from "./middlewares/XForwardedFor/XForwardedFor";
 
 //middlewares
-import RequestRateModule from './middlewares/stats/requestRateCounter'
-import CookieHandlers from './middlewares/cookieEncryption/cookieEncrypt';
-import RateLimiter from './middlewares/ratelimiting/ratelimiting'
-import AdminIdentifier from './middlewares/adminMiddleware/identifyAdmin'
-import ProcessXAdminHeader from './middlewares/adminMiddleware/processX-AdminHeader'
+import RequestRateModule from "./middlewares/stats/requestRateCounter";
+import CookieHandlers from "./middlewares/cookieEncryption/cookieEncrypt";
+import RateLimiter from "./middlewares/ratelimiting/ratelimiting";
+import AdminIdentifier from "./middlewares/adminMiddleware/identifyAdmin";
+import ProcessXAdminHeader from "./middlewares/adminMiddleware/processX-AdminHeader";
 
 //config settings
-initialize.initializeSettings(0, mainFunction)
+initialize.initializeSettings(0, mainFunction);
 
 //main function of the module; runs only when everythings alright, configs are loaded and other checklists are completed
-async function mainFunction(){
-//mainfunction start
+async function mainFunction() {
+  //mainfunction start
 
-const app = express();
-app.use(cookieparser());
+  const app = express();
+  app.use(cookieparser());
 
-let sslOptions: sslOptions = {
+  let sslOptions: sslOptions = {
     key: Buffer.alloc(1),
-    cert: Buffer.alloc(1)
-}
+    cert: Buffer.alloc(1),
+  };
 
-if(settingsData.protocol == "https"){
-    try{
-        sslOptions = {
-            key: fs.readFileSync(settingsData.sslKeyPath),
-            cert: fs.readFileSync(settingsData.sslCertPath)
-        }
-        startOnHTTPS()
-    }catch(e){
-        console.log("FATAL! SSL key or certificate could not be found, therefore running on http")
-        startOnHTTP()
+  if (settingsData.protocol == "https") {
+    try {
+      sslOptions = {
+        key: fs.readFileSync(settingsData.sslKeyPath),
+        cert: fs.readFileSync(settingsData.sslCertPath),
+      };
+      startOnHTTPS();
+    } catch (e) {
+      console.log(
+        "FATAL! SSL key or certificate could not be found, therefore running on http",
+      );
+      startOnHTTP();
     }
-}else{
-    startOnHTTP()
-}
+  } else {
+    startOnHTTP();
+  }
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-app.use(express.urlencoded({extended : false}));
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(express.urlencoded({ extended: false }));
 
-app.set('view engine', 'ejs');
-app.set('views', path.resolve(process.cwd(), '../views'));
+  app.set("view engine", "ejs");
+  app.set("views", path.resolve(process.cwd(), "../views"));
 
-const controller = new AbortController()
+  const controller = new AbortController();
 
-//====layer 1 : Handle Admin Instructions
-app.use(AdminIdentifier.identifyAdmin(settingsData.adminMode, settingsData.adminDefinedPath, settingsData.adminRequiredReloadCount, settingsData.adminReloadTimeWindow))
-app.use(ProcessXAdminHeader.processXAdminHeader(settingsData.adminDefinedPath, "34f3r"))
+  //====layer 1 : Handle Admin Instructions
+  app.use(
+    AdminIdentifier.identifyAdmin(
+      settingsData.adminMode,
+      settingsData.adminDefinedPath,
+      settingsData.adminRequiredReloadCount,
+      settingsData.adminReloadTimeWindow,
+    ),
+  );
+  app.use(
+    ProcessXAdminHeader.processXAdminHeader(
+      settingsData.adminDefinedPath,
+      "34f3r",
+    ),
+  );
 
-//====layer 2 : Reject requests if NetBreaker is offline (runningStatus=0)
-app.use(ServiceStatusManager.handleServiceStatus())
+  //====layer 2 : Reject requests if NetBreaker is offline (runningStatus=0)
+  app.use(ServiceStatusManager.handleServiceStatus());
 
-//====layer 3 : Ip Normalization & Origin Inspecter
-app.use(NeutralizeIP.neutralizeIPv4AndIPv6)       //Adds req.normalIP, IP address regardless of IPv4 or IPv6
-app.use(OriginFiltering.filterOrigin(settingsData.inspectOriginMode))
+  //====layer 3 : Ip Normalization & Origin Inspecter
+  app.use(NeutralizeIP.neutralizeIPv4AndIPv6); //Adds req.normalIP, IP address regardless of IPv4 or IPv6
+  app.use(OriginFiltering.filterOrigin(settingsData.inspectOriginMode));
 
-//====layer 4 : rate-limiting
-app.use(RateLimiter.limitRateTo(settingsData.maxRequestRateLimit))
+  //====layer 4 : rate-limiting
+  app.use(RateLimiter.limitRateTo(settingsData.maxRequestRateLimit));
 
-//====layer 5 : memory limiting/load queuer
+  //====layer 5 : memory limiting/load queuer
 
+  //====layer 6: catches if the server is offline
+  // ServerStatusModule.checkTargetServerStatus()
+  // app.use(ServiceStatusManager.handleTargetServiceStatus())
 
-//====layer 6: catches if the server is offline
-// ServerStatusModule.checkTargetServerStatus()
-// app.use(ServiceStatusManager.handleTargetServiceStatus())
+  //====layer 7 : remove unnecessary headers
+  app.disable("x-powered-by");
 
-//====layer 7 : remove unnecessary headers
-app.disable("x-powered-by");
+  //====layer 8 : add necessary headers
+  app.use(XForwarderFor.addXForwardedFor())
 
-//====layer 8 : Stats
-app.use(RequestRateModule.requestRateCounter)
-RequestRateModule.refreshCounterAndUpdateRate()   //to initiate the request counter
+  //====layer 8 : Stats
+  app.use(RequestRateModule.requestRateCounter);
+  RequestRateModule.refreshCounterAndUpdateRate(); //to initiate the request counter
 
-//Log Stats
-Stats.LogStats(1000)                     //for development phase and testing
+  //Log Stats
+  Stats.LogStats(1000); //for development phase and testing
 
-// memory-usage-updater
-ComputerUsage.memoryUsageMonitor()
+  // memory-usage-updater
+  ComputerUsage.memoryUsageMonitor();
 
-//====layer 9 : cookiehandlers
-app.use(CookieHandlers.handleIncomingCookie(settingsData.cipherkey, settingsData.cookieEncryption))
+  //====layer 9 : cookiehandlers
+  app.use(
+    CookieHandlers.handleIncomingCookie(
+      settingsData.cipherkey,
+      settingsData.cookieEncryption,
+    ),
+  );
 
-//final response when every security layer is passed
-app.use(async (req, res, next) => {
-    if(!DNSmodule.checkDomainInventory(req.hostname)){
-        res.render("renderError", {errno:-105, msg:"Failed to lookup for hostname - "+req.hostname})
+  //final response when every security layer is passed
+  app.use(async (req, res, next) => {
+    if (!DNSmodule.checkDomainInventory(req.hostname)) {
+      res.render("renderError", {
+        errno: -105,
+        msg: "Failed to lookup for hostname - " + req.hostname,
+      });
     }
-    await fetch("http://127.0.0.1:"+DNSmodule.smartDnsLookup(req.hostname)+req.path, {
-        method: (req.method).toString(),
+    await fetch(
+      "http://127.0.0.1:" + DNSmodule.smartDnsLookup(req.hostname) + req.path,
+      {
+        method: req.method.toString(),
         headers: req.headers as HeadersInit,
-        body: req.body? JSON.stringify(req.body): null,
-        signal: controller.signal
-    }).then((response: any)=>{
+        body: req.body ? JSON.stringify(req.body) : null,
+        signal: controller.signal,
+      },
+    )
+      .then((response: any) => {
         // if(response.ok || response.status == "304"){
         //     settingsData.currentServerStatus=1
         //     TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
@@ -123,54 +152,61 @@ app.use(async (req, res, next) => {
         // }
 
         response.headers.forEach((value: string, key: string) => {
-            const lowerkey = key.toLowerCase()
+          const lowerkey = key.toLowerCase();
 
-            const headerblocklist = [
-                'content-encoding',
-                'content-length',   
-                'transfer-encoding',
-                'connection',
-                'keep-alive',
-                'x-powered-by'
-            ]
+          const headerblocklist = [
+            "content-encoding",
+            "content-length",
+            "transfer-encoding",
+            "connection",
+            "keep-alive",
+            "x-powered-by",
+          ];
 
-            if(!headerblocklist.includes(lowerkey)){
-                res.setHeader(key, value)
-            }
-        })
+          if (!headerblocklist.includes(lowerkey)) {
+            res.setHeader(key, value);
+          }
+        });
 
-        res.setHeader("Set-Cookie", CookieHandlers.handleOutGoingCookie(response, settingsData.cipherkey, settingsData.cookieEncryption));
+        res.setHeader(
+          "Set-Cookie",
+          CookieHandlers.handleOutGoingCookie(
+            response,
+            settingsData.cipherkey,
+            settingsData.cookieEncryption,
+          ),
+        );
 
-        res.status(response.status)
-        if (!response.body){
-            return res.end()
+        res.status(response.status);
+        if (!response.body) {
+          return res.end();
         }
 
-        const mainStream = stream.Readable.fromWeb(response.body as any)
-        mainStream.pipe(res)
-        next()
-    }).catch((err)=>{
-        settingsData.currentServerStatus=0
+        const mainStream = stream.Readable.fromWeb(response.body as any);
+        mainStream.pipe(res);
+        next();
+      })
+      .catch((err) => {
+        settingsData.currentServerStatus = 0;
         // TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
-    })
-});
+      });
+  });
 
-function startOnHTTP(){
+  function startOnHTTP() {
     app.listen(settingsData.port, () => {
-        LogOnStart.logOnStart()
-    })
-}
-function startOnHTTPS(){
-    const secureServer = https.createServer(sslOptions, app)
+      LogOnStart.logOnStart();
+    });
+  }
+  function startOnHTTPS() {
+    const secureServer = https.createServer(sslOptions, app);
     secureServer.listen(settingsData.port, () => {
-        LogOnStart.logOnStart()
-        console.log("Listening on https")
-    })
-}
+      LogOnStart.logOnStart();
+      console.log("Listening on https");
+    });
+  }
 
-//mainfunction end
+  //mainfunction end
 }
-
 
 //to add :
 // load queuer (based on memory usage)
@@ -182,4 +218,3 @@ function startOnHTTPS(){
 
 //when an ip is added to whitelist by admin panel, update the ipwhitelist.nb file at that moment only
 //add a lightweight standbymode when NetBreaker is off, ie status=0 or currentServerStatus=0, which responds as res.end()
-

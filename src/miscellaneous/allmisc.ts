@@ -17,18 +17,9 @@ function breakline(){
 function boolToNumber(booleanValue: boolean){
     (booleanValue == true)? 1 :  0
 }
- 
-function neutralizeIP(ip: string){
-    if(ip.startsWith('::ffff:')){
-        return ip.replace('::ffff:', '')
-    }else{
-        return ip
-    }
-}
 
 export default {
     breakline,
     sleep,
-    boolToNumber,
-    neutralizeIP
+    boolToNumber
 }

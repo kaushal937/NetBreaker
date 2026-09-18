@@ -11,17 +11,17 @@ let forwardDnsMap: Map<string, number[]> = new Map()
 function DNSZone(){
     try{
         rawIpMap.forEach((element: IPMap)=>{
-            availableDnsList.push(Object.keys(element)[0])
             forwardDnsMap.set(Object.keys(element)[0], Object.values(element)[0])
         })
     }catch(e){
         console.log("Error in loading DNS zone. Subdomains may not point correctly")
     }
-
+    
     return forwardDnsMap
 }
 
 function DomainInventory(){
+    
     try{
         rawIpMap.forEach((element: IPMap)=>{
             availableDnsList.push(Object.keys(element)[0])

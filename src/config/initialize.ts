@@ -1,8 +1,8 @@
-import {settings} from '../interfaces/interfaces';
+import {settings, StatusMapping, HostnameServerArrayData, MiscellaneousData} from '../interfaces/interfaces';
 import allmisc from '../miscellaneous/allmisc';
 import {getsetting} from "./getsettings";
 import IPMapping from "./getMapping";
-import os from 'os'
+import os, { hostname } from 'os'
 import ipListReaders from '../controllers/ipListModule/ipListParser'
 
 let settingsData:settings = {
@@ -22,6 +22,8 @@ let settingsData:settings = {
     sslKeyPath : "/etc",
     sslCertPath : "/etc"
 }
+
+let statusMapping: StatusMapping[] = []
 
 let ipBlackList: string[]
 let ipWhiteList: string[]
@@ -216,10 +218,41 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             domainInventory = ['error']
             dnsZone = new Map().set("error", [-1])
         }
+        try{
+            function returnServerArrayData(Hostname: string){
+                var subArray = iterableDnsZoneEntries.find(([toFind]) => toFind == Hostname)
+                var portArray = subArray? subArray[1] : [-8]
+                return portArray
+            }
+
+            const iterableDnsZoneEntries = [...dnsZone.entries()]
+            var ServerData: StatusMapping[] = []
+            domainInventory.forEach((dname)=>{
+                var dnamePorts: HostnameServerArrayData[] = []
+                returnServerArrayData(dname).forEach((portNumber)=>{
+                    dnamePorts.push({
+                        port : portNumber,
+                        status : 0,
+                        loadAssignment : []
+                    })
+                })
+                ServerData.push({
+                    hostname : dname,
+                    StatusData : dnamePorts,
+                    MiscellaneousData : {
+                        views : 0,
+                        reqs : 0
+                    }
+                })
+            })
+            statusMapping = ServerData
+        }catch(e){
+            console.log("Error is Status assignment of proxy servers")
+        }
     }catch(e){
         return 0
     }
 }
 
 export default { initializeSettings }
-export { settingsData, ipBlackList, ipWhiteList, domainInventory, dnsZone}
+export { settingsData, ipBlackList, ipWhiteList, domainInventory, dnsZone, statusMapping}

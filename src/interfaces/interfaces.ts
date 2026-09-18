@@ -1,3 +1,6 @@
+import { name } from "ejs";
+import { hostname } from "node:os";
+
 interface settings{
     port : number;
     runningStatus : number;
@@ -28,9 +31,30 @@ interface sslOptions{
 interface IPMap{
     key : number[]
 }
+
+interface HostnameServerArrayData{
+    port : number;
+    status : number;
+    loadAssignment : string[];
+}
+
+interface MiscellaneousData{
+    views : number;
+    reqs : number;
+}
+
+interface StatusMapping{
+    hostname : string;
+    StatusData : HostnameServerArrayData[],
+    MiscellaneousData : MiscellaneousData
+}
+
 export {
     settings,
     memoryUsageStats,
     sslOptions,
-    IPMap
+    IPMap,
+    StatusMapping,
+    HostnameServerArrayData,
+    MiscellaneousData
 }
