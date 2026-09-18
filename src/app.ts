@@ -12,7 +12,7 @@ import TargetServerStatus from "./middlewares/stats/targetServerStatus";
 import ComputerUsage from "./middlewares/stats/computingPowerUsage";
 import initialize from "./config/initialize";
 import { settingsData } from "./config/initialize";
-// import ServerStatusModule from './controllers/serverStatus/serverStatus'
+import ServerStatusModule from './middlewares/serverStatusMoniterManager/serverStatus'
 import ServiceStatusManager from "./middlewares/serverStatusMoniterManager/serverStatusManager";
 import LogOnStart from "./controllers/logOnStart/logOnStart";
 import NeutralizeIP from "./middlewares/IpModule/ipNeutralization";
@@ -98,8 +98,8 @@ async function mainFunction() {
   //====layer 5 : memory limiting/load queuer
 
   //====layer 6: catches if the server is offline
-  // ServerStatusModule.checkTargetServerStatus()
-  // app.use(ServiceStatusManager.handleTargetServiceStatus())
+  app.use(ServerStatusModule.checkTargetServerStatus())
+  app.use(ServiceStatusManager.handleTargetServiceStatus())
 
   //====layer 7 : remove unnecessary headers
   app.disable("x-powered-by");

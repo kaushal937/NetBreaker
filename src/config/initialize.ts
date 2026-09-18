@@ -2,7 +2,7 @@ import {settings, StatusMapping, HostnameServerArrayData, MiscellaneousData} fro
 import allmisc from '../miscellaneous/allmisc';
 import {getsetting} from "./getsettings";
 import IPMapping from "./getMapping";
-import os, { hostname } from 'os'
+import os from 'os'
 import ipListReaders from '../controllers/ipListModule/ipListParser'
 
 let settingsData:settings = {
@@ -246,6 +246,7 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
                 })
             })
             statusMapping = ServerData
+            console.dir(statusMapping, { depth: null, colors: true })
         }catch(e){
             console.log("Error is Status assignment of proxy servers")
         }
