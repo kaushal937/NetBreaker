@@ -13,7 +13,7 @@
     "portforwarding",
     "safety"
   ],
-  "homepage": "https://github.com/kaushal937/NetBreaker#readme",
+  "homepage": "https://netbreaker.maywill.online",
   "bugs": {
     "url": "https://github.com/kaushal937/NetBreaker/issues"
   },
@@ -21,8 +21,8 @@
     "type": "git",
     "url": "git+https://github.com/kaushal937/NetBreaker.git"
   },
-  "license": "ISC",
-  "author": "kaushal937",
+  "license": "Apache-2.0",
+  "author": "Kaushal (https://github.com/kaushal937)",
   "main": "app.ts",
   "scripts": {
     "start": "npx tsc && node dist/app.js"

@@ -218,3 +218,14 @@ async function mainFunction() {
 
 //when an ip is added to whitelist by admin panel, update the ipwhitelist.nb file at that moment only
 //add a lightweight standbymode when NetBreaker is off, ie status=0 or currentServerStatus=0, which responds as res.end()
+
+
+// const path = require('path');
+// const fs = require('fs');
+
+// // Read-only files shipped beside the exe (assets, default config)
+// const APP_DIR = path.dirname(process.execPath);
+
+// // Anything the app writes (logs, DB, uploads, user config)
+// const DATA_DIR = path.join(process.env.PROGRAMDATA || 'C:\\ProgramData', 'MyApp');
+// fs.mkdirSync(DATA_DIR, { recursive: true });
