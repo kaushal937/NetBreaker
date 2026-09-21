@@ -60,9 +60,9 @@ async function mainFunction() {
     startOnHTTP();
   }
 
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(express.urlencoded({ extended: false }));
+  // app.use(bodyParser.json());
+  // app.use(bodyParser.urlencoded({ extended: true }));
+  // app.use(express.urlencoded({ extended: false }));
 
   app.set("view engine", "ejs");
   app.set("views", path.resolve(process.cwd(), "../views"));
@@ -134,13 +134,16 @@ async function mainFunction() {
       });
     }
     await fetch(
-      "http://127.0.0.1:" + DNSmodule.smartDnsLookup(req.hostname, req.normalIP?? "") + req.path,
+      "http://127.0.0.1:" + DNSmodule.smartDnsLookup(req.hostname, req.normalIP ?? "") + req.path,
       {
         method: req.method.toString(),
         headers: req.headers as HeadersInit,
-        body: req.body ? JSON.stringify(req.body) : null,
+        body: req.method === "GET" || req.method === "HEAD"
+          ? undefined
+          : req as any,
+        duplex: "half",
         signal: controller.signal,
-      },
+      } as any,
     )
       .then((response: any) => {
         // if(response.ok || response.status == "304"){
@@ -183,8 +186,16 @@ async function mainFunction() {
         }
 
         const mainStream = stream.Readable.fromWeb(response.body as any);
-        mainStream.pipe(res);
-        next();
+        mainStream.on("error", (err) => {
+          if (!res.headersSent) {
+            res.status(500).end()
+          } else {
+            res.destroy(err)
+          }
+        })
+
+        mainStream.pipe(res)
+        return
       })
       .catch((err) => {
         settingsData.currentServerStatus = 0;
@@ -218,14 +229,3 @@ async function mainFunction() {
 
 //when an ip is added to whitelist by admin panel, update the ipwhitelist.nb file at that moment only
 //add a lightweight standbymode when NetBreaker is off, ie status=0 or currentServerStatus=0, which responds as res.end()
-
-
-// const path = require('path');
-// const fs = require('fs');
-
-// // Read-only files shipped beside the exe (assets, default config)
-// const APP_DIR = path.dirname(process.execPath);
-
-// // Anything the app writes (logs, DB, uploads, user config)
-// const DATA_DIR = path.join(process.env.PROGRAMDATA || 'C:\\ProgramData', 'MyApp');
-// fs.mkdirSync(DATA_DIR, { recursive: true });
