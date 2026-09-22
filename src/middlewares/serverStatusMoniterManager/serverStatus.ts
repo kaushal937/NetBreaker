@@ -11,12 +11,12 @@ function checkTargetServerStatus(){
                 next()
             }else{
                 ProxyStatusAssigner.assignStatus(req.hostname, fetchPort, 0)
-                res.render("renderError", {errno: 500, msg: "Internal Server Error - Server is offline. Try again later."})
+                res.render("renderError", {errno: 500, msg: "Internal Server Error - Server is offline. Try again later.", errhash : "https://netbreaker.maywill.online/docs"})
             }
         })
         .catch(error => {
             ProxyStatusAssigner.assignStatus(req.hostname, fetchPort, 0);
-            res.render("renderError", {errno: 500, msg: "Internal Server Error - Server is offline. Try again later."});
+            res.render("renderError", {errno: 500, msg: "Internal Server Error - Server is offline. Try again later.", errhash : "https://netbreaker.maywill.online/docs"});
         })
     }
 }

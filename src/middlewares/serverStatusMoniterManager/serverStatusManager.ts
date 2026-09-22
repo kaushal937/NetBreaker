@@ -6,7 +6,7 @@ function handleServiceStatus(){
         if(settingsData.runningStatus == 1){
             next()
         }else{
-            res.render("renderError", {errno: 500, msg: "NetBreaker is offline"})
+            res.render("renderError", {errno: 500, msg: "NetBreaker is offline", errhash : "https://netbreaker.maywill.online/docs"})
         }
     }
 }
@@ -16,7 +16,7 @@ function handleTargetServiceStatus(){
         if(settingsData.currentServerStatus == 1){
             next()
         }else{
-            res.render("renderError", {errno:400, msg:"Server is currently unavailable"})
+            res.render("renderError", {errno:400, msg:"Server is currently unavailable", errhash : "https://netbreaker.maywill.online/docs"})
             // ServerStatusModule.checkTargetServerStatus()
             // res.render("renderError", {errno:400, msg:"internal server error(s)"})
             next()

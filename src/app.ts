@@ -5,6 +5,7 @@ import path from "path";
 import bodyParser from "body-parser";
 import cookieparser from "cookie-parser";
 import stream from "stream";
+import {Request, Response, NextFunction} from 'express';
 
 import allmisc from "./miscellaneous/allmisc";
 import Stats from "./middlewares/stats/allStats";
@@ -126,11 +127,12 @@ async function mainFunction() {
   );
 
   //final response when every security layer is passed
-  app.use(async (req, res, next) => {
+  app.use(async (req: Request , res: Response, next: NextFunction) => {
     if (!DNSmodule.checkDomainInventory(req.hostname)) {
       res.render("renderError", {
         errno: -105,
         msg: "Failed to lookup for hostname - " + req.hostname,
+        errhash : "https://netbreaker.maywill.online/docs"
       });
     }
     await fetch(
@@ -145,7 +147,7 @@ async function mainFunction() {
         signal: controller.signal,
       } as any,
     )
-      .then((response: any) => {
+    .then((response: any) => {
         // if(response.ok || response.status == "304"){
         //     settingsData.currentServerStatus=1
         //     TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
@@ -165,12 +167,10 @@ async function mainFunction() {
             "keep-alive",
             "x-powered-by",
           ];
-
           if (!headerblocklist.includes(lowerkey)) {
             res.setHeader(key, value);
           }
         });
-
         res.setHeader(
           "Set-Cookie",
           CookieHandlers.handleOutGoingCookie(
@@ -179,12 +179,10 @@ async function mainFunction() {
             settingsData.cookieEncryption,
           ),
         );
-
         res.status(response.status);
         if (!response.body) {
           return res.end();
         }
-
         const mainStream = stream.Readable.fromWeb(response.body as any);
         mainStream.on("error", (err) => {
           if (!res.headersSent) {
@@ -193,7 +191,6 @@ async function mainFunction() {
             res.destroy(err)
           }
         })
-
         mainStream.pipe(res)
         return
       })
