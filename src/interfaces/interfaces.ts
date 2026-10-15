@@ -22,6 +22,7 @@ interface settings{
     protocol : string;
     sslKeyPath : string;
     sslCertPath : string;
+    fallbackPort : number;
 }
 
 interface memoryUsageStats{

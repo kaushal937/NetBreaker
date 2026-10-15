@@ -1,5 +1,6 @@
 import { statusMapping } from "../../config/initialize";
 
+//might need to recreate this
 function shiftBalance(Hostname: string, portNumber: number){
     let dnsHostnameDataIndex = statusMapping.findIndex((obj) => obj.hostname == Hostname)
     let dnsHostnameData = (dnsHostnameDataIndex != -1)? statusMapping[dnsHostnameDataIndex] : null
@@ -35,7 +36,6 @@ function shiftBalance(Hostname: string, portNumber: number){
         for(let i=0; i<divideAmong; i++){
 
         }
-
     }
 
 }

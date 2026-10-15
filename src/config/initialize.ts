@@ -20,7 +20,8 @@ let settingsData:settings = {
     adminReloadTimeWindow : 5000,
     protocol : "http",
     sslKeyPath : "/etc",
-    sslCertPath : "/etc"
+    sslCertPath : "/etc",
+    fallbackPort : 9090
 }
 
 let statusMapping: StatusMapping[] = []
@@ -31,7 +32,7 @@ let ipWhiteList: string[]
 let domainInventory: string[]
 let dnsZone: Map<string, number[]>
 
-let settingsChecklistRequirement: number = 14
+let settingsChecklistRequirement: number = 15
 let settingsChecklist: number = 0
 
 function waitstatus(){
@@ -191,6 +192,20 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
                 settingsData.adminReloadTimeWindow = parseInt(data?? "5000" )
                 settingsChecklist++;
                 gonext()
+            }
+        })
+        getsetting("errorPagePort", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+            if(err){
+                console.log(err)
+                return
+            }else{
+                settingsData.fallbackPort = parseInt(data ?? "-1")
+                if(settingsData.fallbackPort === -1 || !(settingsData.fallbackPort>0)){
+                    settingsChecklist++;
+                    gonext()
+                }else{
+                    return
+                }
             }
         })
         try{
