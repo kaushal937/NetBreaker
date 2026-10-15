@@ -1,8 +1,9 @@
 import CookieEncryptionModule from "../../cookieEncryption/cookieEncryptionFunctions";
+import { Request, Response, NextFunction } from 'express';
 
 function handleIncomingCookie(cipherKey: string, encryptOrNot: number){
     //decryption
-    return (req: any, res: any, next: any)=>{
+    return (req: Request, res: Response, next: NextFunction)=>{
         if(encryptOrNot == 1){
             req.cookies = CookieEncryptionModule.decryptCookie(req.cookies, cipherKey)
         }

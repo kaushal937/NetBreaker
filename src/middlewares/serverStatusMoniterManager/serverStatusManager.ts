@@ -1,8 +1,9 @@
 import {settingsData} from '../../config/initialize'
 // import ServerStatusModule from '../../controllers/serverStatus/serverStatus'
+import { Request, Response, NextFunction } from 'express';
 
 function handleServiceStatus(){
-    return (req: any, res: any, next: any)=>{
+    return (req: Request, res: Response, next: NextFunction)=>{
         if(settingsData.runningStatus == 1){
             next()
         }else{
@@ -12,7 +13,7 @@ function handleServiceStatus(){
 }
 
 function handleTargetServiceStatus(){
-    return (req: any, res: any, next: any)=>{
+    return (req: Request, res: Response, next: NextFunction)=>{
         if(settingsData.currentServerStatus == 1){
             next()
         }else{
