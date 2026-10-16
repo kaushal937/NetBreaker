@@ -64,9 +64,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
     }
     try{
         getsetting("port", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'port' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.port = parseInt(data ?? "0")
                 settingsChecklist++;
@@ -74,9 +77,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("status", (err: NodeJS.ErrnoException | null, data : string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'status' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.runningStatus = parseInt(data ?? "0")
                 settingsChecklist++;
@@ -84,9 +90,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("cipherkey", (err: NodeJS.ErrnoException | null, data : string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'cipherkey' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.cipherkey = data?.toString() || ""
                 settingsChecklist++;
@@ -94,9 +103,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("cookieEncryptOption", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'cookieEncryptOption' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 (data)? allmisc.boolToNumber((data === "true")) : settingsData.cookieEncryption = parseInt(data ?? "1")
                 settingsData.cookieEncryption = parseInt(data ?? "1")
@@ -105,9 +117,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("maxRequestRateLimit", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+           if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'maxRequestRateLimit' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.maxRequestRateLimit = parseInt(data ?? "5000")
                 settingsChecklist++;
@@ -115,9 +130,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("protocol", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'protocol' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.protocol = data?.toString() || "http"
                 settingsChecklist++;
@@ -125,9 +143,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("sslKeyPath", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'sslKeyPath' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.sslKeyPath = data?.toString() || "/etc"
                 settingsChecklist++;
@@ -135,9 +156,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("sslCertPath", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'sslCertPath' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.sslCertPath = data?.toString() || "/etc"
                 settingsChecklist++;
@@ -145,9 +169,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("inspectOriginMode", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'inspectOriginMode' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.inspectOriginMode = data?? "wl"
                 settingsChecklist++;
@@ -155,9 +182,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("adminMode", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'adminMode' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.adminMode = parseInt(data?? "1") 
                 settingsChecklist++;
@@ -165,9 +195,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("adminDefinedPath", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'adminDefinedPathRequiredReloadCount' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.adminDefinedPath = data?? "/" 
                 settingsChecklist++;
@@ -175,9 +208,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("adminDefinedPathRequiredReloadCount", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'adminDefinedPathRequiredReloadCount' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.adminRequiredReloadCount = parseInt(data?? "5")
                 settingsChecklist++;
@@ -185,9 +221,12 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("adminDefinedPathReloadTimeWindow", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'adminDefinedPathReloadTimeWindow' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.adminReloadTimeWindow = parseInt(data?? "5000" )
                 settingsChecklist++;
@@ -195,16 +234,19 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             }
         })
         getsetting("errorPagePort", (err: NodeJS.ErrnoException | null, data: string | null)=>{
-            if(err){
-                console.log(err)
-                return
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'errorPagePort' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
             }else{
                 settingsData.fallbackPort = parseInt(data ?? "-1")
-                if(settingsData.fallbackPort === -1 || !(settingsData.fallbackPort>0)){
+                if(settingsData.fallbackPort === -1 || !(settingsData.fallbackPort<0)){
                     settingsChecklist++;
                     gonext()
                 }else{
-                    return
+                    throw new Error("Error : Can't find fallback Port\n\t invalid fallback port : "+data)
                 }
             }
         })
