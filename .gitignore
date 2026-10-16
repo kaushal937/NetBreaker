@@ -3,3 +3,4 @@ node_modules
 .vscode
 /dist
 bin
+src/controllers/logs/reqLogs/liblogger.so
