@@ -1,4 +1,5 @@
 import { statusMapping } from "../../config/initialize";
+import BalanceShifter from "../serverStatus/loadAssigner"
 
 function assignStatus(hostname: string, portNumber: number, value: number){
     if(portNumber==-1){
@@ -13,8 +14,12 @@ function assignStatus(hostname: string, portNumber: number, value: number){
             indexInPortArray = portArray?.findIndex((objectToFind) => objectToFind.port == portNumber) ?? 0
         }
     }
-    statusMapping[dnsHostnameDataIndex].StatusData[indexInPortArray].status = value
-    // shiftBalance()
+    try{
+        statusMapping[dnsHostnameDataIndex].StatusData[indexInPortArray].status = value
+    }catch(e){
+        return
+    }
+    // BalanceShifter.shiftBalance(hostname,portNumber)
 }
 
 export default {

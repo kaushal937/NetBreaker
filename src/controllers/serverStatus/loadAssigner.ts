@@ -39,6 +39,7 @@ function shiftBalance(Hostname: string, portNumber: number){
     }
 
 }
+//to-do : rewrite this entirely, in c++
 
 export default {
     shiftBalance

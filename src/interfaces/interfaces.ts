@@ -23,6 +23,9 @@ interface settings{
     sslKeyPath : string;
     sslCertPath : string;
     fallbackPort : number;
+    cpuLength : number;
+    workers : string;
+    reqRate : number;
 }
 
 interface memoryUsageStats{

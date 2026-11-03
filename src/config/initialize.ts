@@ -21,7 +21,10 @@ let settingsData:settings = {
     protocol : "http",
     sslKeyPath : "/etc",
     sslCertPath : "/etc",
-    fallbackPort : 9090
+    fallbackPort : 9090,
+    cpuLength : 0,
+    workers : "0",
+    reqRate : 0
 }
 
 let statusMapping: StatusMapping[] = []
@@ -32,7 +35,7 @@ let ipWhiteList: string[]
 let domainInventory: string[]
 let dnsZone: Map<string, number[]>
 
-let settingsChecklistRequirement: number = 15
+let settingsChecklistRequirement: number = 17
 let settingsChecklist: number = 0
 
 function waitstatus(){
@@ -194,6 +197,19 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
                 gonext()
             }
         })
+        getsetting("workers", (err: NodeJS.ErrnoException | null, data: string | null)=>{
+            if(err || data === "not found"){
+                if(data === "not found"){
+                    throw new Error("Error in reading config.nb\n\tvariable 'workers' not found")
+                }else{
+                    throw new Error("Error in reading config.nb\n\tCouldn't read config.nb")
+                }
+            }else{
+                settingsData.workers = data??"0"
+                settingsChecklist++;
+                gonext()
+            }
+        })
         getsetting("adminDefinedPath", (err: NodeJS.ErrnoException | null, data: string | null)=>{
             if(err || data === "not found"){
                 if(data === "not found"){
@@ -258,6 +274,13 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             gonext()
         }
         try{
+            settingsData.cpuLength = os.cpus().length
+            settingsChecklist++;
+            gonext()
+        }finally{
+            gonext()
+        }
+        try{
             ipListReaders.readBlackList((List: string[])=>{
                 ipBlackList = List
             })
@@ -312,5 +335,9 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
     }
 }
 
+function editReqRate(val:number){
+    settingsData.reqRate = val
+}
+
 export default { initializeSettings }
-export { settingsData, ipBlackList, ipWhiteList, domainInventory, dnsZone, statusMapping}
+export { settingsData, ipBlackList, ipWhiteList, domainInventory, dnsZone, statusMapping, editReqRate}

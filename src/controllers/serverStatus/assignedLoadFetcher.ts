@@ -1,5 +1,4 @@
 import { statusMapping } from "../../config/initialize";
-import BalanceShifter from "../serverStatus/loadAssigner"
 import { settingsData } from "../../config/initialize";
 
 //checks if user is already listed in some instance, and if not, assigns the user a port.

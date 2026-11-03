@@ -2,10 +2,10 @@ import express from "express";
 import https from "https";
 import fs from "node:fs";
 import path from "path";
-import bodyParser from "body-parser";
 import cookieparser from "cookie-parser";
 import stream from "stream";
 import koffi from "koffi";
+import cluster from "node:cluster";
 
 import allmisc from "./miscellaneous/allmisc";
 import {Request, Response, NextFunction} from 'express';
@@ -31,7 +31,28 @@ import AdminIdentifier from "./middlewares/adminMiddleware/identifyAdmin";
 import ProcessXAdminHeader from "./middlewares/adminMiddleware/processX-AdminHeader";
 
 //config settings
-initialize.initializeSettings(0, mainFunction);
+initialize.initializeSettings(0, spawnWorkers);
+
+//Spawn Workers
+function spawnWorkers(){
+  if(Number.isNaN(parseInt(settingsData.workers)) == true){
+    if(cluster.isPrimary){
+      for(let i = 0; i < settingsData.cpuLength; i++){
+        cluster.fork()
+      }
+    }else{
+      mainFunction()
+    }
+  }else{
+    if(cluster.isPrimary){
+      for(let i = 0; i < parseInt(settingsData.workers); i++){
+        cluster.fork()
+      }
+    }else{
+      mainFunction()
+    }
+  }
+}
 
 //main function of the module; runs only when everythings alright, configs are loaded and other checklists are completed
 async function mainFunction() {
@@ -62,10 +83,6 @@ async function mainFunction() {
     startOnHTTP();
   }
 
-  // app.use(bodyParser.json());
-  // app.use(bodyParser.urlencoded({ extended: true }));
-  // app.use(express.urlencoded({ extended: false }));
-
   app.set("view engine", "ejs");
   app.set("views", path.resolve(process.cwd(), "../views"));
 
@@ -80,12 +97,12 @@ async function mainFunction() {
       settingsData.adminReloadTimeWindow,
     ),
   );
-  app.use(
-    ProcessXAdminHeader.processXAdminHeader(
-      settingsData.adminDefinedPath,
-      "34f3r",
-    ),
-  );
+  // app.use(
+  //   ProcessXAdminHeader.processXAdminHeader(
+  //     settingsData.adminDefinedPath,
+  //     "34f3r",
+  //   ),
+  // );
 
   //====layer 2 : Reject requests if NetBreaker is offline (runningStatus=0)
   app.use(ServiceStatusManager.handleServiceStatus());
@@ -149,17 +166,8 @@ async function mainFunction() {
       } as any,
     )
     .then((response: any) => {
-        // if(response.ok || response.status == "304"){
-        //     settingsData.currentServerStatus=1
-        //     TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
-        // }else{
-        //     settingsData.currentServerStatus=0
-        //     TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
-        // }
-
         response.headers.forEach((value: string, key: string) => {
           const lowerkey = key.toLowerCase();
-
           const headerblocklist = [
             "content-encoding",
             "content-length",
@@ -197,7 +205,6 @@ async function mainFunction() {
       })
       .catch((err) => {
         settingsData.currentServerStatus = 0;
-        // TargetServerStatus.assignTargetServerStatus(settingsData.currentServerStatus)
       });
   });
 
