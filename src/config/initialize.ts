@@ -328,7 +328,7 @@ function initializeSettings(waitTimeBeforeStarting: number, mainCallBack: any){
             statusMapping = ServerData
             console.dir(statusMapping, { depth: null, colors: true })
         }catch(e){
-            console.log("Error is Status assignment of proxy servers")
+            console.log("Error in Status assignment of proxy servers")
         }
     }catch(e){
         return 0
