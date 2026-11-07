@@ -1,5 +1,3 @@
-Copyright 2026 Kaushal (https://github.com/kaushal937)
-
 <h1 align="center">NetBreaker</h1>
 
 <p align="center">
@@ -72,6 +70,6 @@ Copyright 2026 Kaushal (https://github.com/kaushal937)
 
 <p align="center">
   Copyright &copy; 2026
-  <a href="https://github.com/kaushal937">Kaushal</a>.
+  <a href="https://github.com/kaushal937">Kaushal</a>.<br>
   All rights reserved.
 </p>
